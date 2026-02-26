@@ -394,6 +394,30 @@
             transition: all 0.3s;
         }
 
+        /* Footer ghi chú */
+        .footer-note {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            border-top: 1px dashed var(--border-default);
+            padding-top: 24px;
+        }
+        .footer-note a {
+            color: var(--border-focus);
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 4px;
+        }
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+        .footer-note .link-url {
+            font-family: monospace;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
         @media (max-width: 800px) {
             .container { padding: 24px; }
             .app-header { flex-wrap: wrap; justify-content: center; }
@@ -453,6 +477,12 @@
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Dòng ghi chú theo yêu cầu -->
+        <div class="footer-note">
+            <span>📋 Nếu cần tóm tắt cận lâm sàng trong y lệnh ngoại trú, vui lòng </span>
+            <a href="https://qtrungyb.github.io/ttcls/" target="_blank">VÀO ĐÂY</a>
         </div>
     </div>
 
