@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tóm tắt cận lâm sàng · Flat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-body: #e9f0f9;
+            --container-bg: #ffffff;
+            --text-primary: #1e3a5f;
+            --text-secondary: #2b4f7b;
+            --border-default: #cbd5e1;
+            --border-focus: #5f9ea0;
+            --card-bg: #ffffff;
+            --badge-bg: #f0f7ff;
+            --btn-bg: #ffffff;
+            --btn-primary-bg: #2b4f7b;
+            --btn-primary-hover: #1e3a5f;
+            --table-header-bg: #d4e6ff;
+            --table-row-even: #f8fcff;
+            --table-row-hover: #e1efff;
+            --toast-bg: #2b4f7b;
+        }
+
+        body.dark-mode {
+            --bg-body: #1a2a3a;
+            --container-bg: #1e3a5f;
+            --text-primary: #f0f7ff;
+            --text-secondary: #b8d4ff;
+            --border-default: #3a5570;
+            --border-focus: #78a7c5;
+            --card-bg: #1e3a5f;
+            --badge-bg: #2b4f7b;
+            --btn-bg: #2b4f7b;
+            --btn-primary-bg: #b8d4ff;
+            --btn-primary-hover: #d4e6ff;
+            --table-header-bg: #2b4f7b;
+            --table-row-even: #1e3a5f;
+            --table-row-hover: #3f6790;
+            --toast-bg: #b8d4ff;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-body);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 24px;
+            color: var(--text-primary);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            background: var(--container-bg);
+            border-radius: 24px;
+            padding: 32px 40px;
+            border: 1px solid var(--border-default);
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .app-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--btn-bg);
+            border: 1px solid var(--border-default);
+            border-radius: 60px;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--text-primary);
+            font-size: 20px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--table-row-hover);
+        }
+
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 18px;
+            padding: 0 6px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 18px 24px;
+            border: 2px solid var(--border-default);
+            border-radius: 24px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            background: var(--card-bg);
+            resize: vertical;
+            outline: none;
+            transition: border 0.2s;
+            color: var(--text-primary);
+        }
+
+        textarea:focus {
+            border-color: var(--border-focus);
+        }
+
+        textarea::placeholder {
+            color: #9ac7e8;
+            opacity: 0.8;
+        }
+
+        body.dark-mode textarea::placeholder {
+            color: #78a7c5;
+        }
+
+        .button-strip {
+            display: flex;
+            gap: 24px;
+            margin: 28px 0 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px 44px;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: var(--btn-bg);
+            border: 1px solid var(--border-default);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: var(--btn-primary-bg);
+            border: none;
+            color: #fff;
+        }
+
+        body.dark-mode .btn-primary {
+            color: #1e3a5f;
+        }
+
+        .btn-primary:hover {
+            background: var(--btn-primary-hover);
+        }
+
+        .btn-outline:hover {
+            background: var(--table-row-hover);
+        }
+
+        .toggle-table-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--border-default);
+            border-radius: 70px;
+            padding: 14px 38px;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .toggle-table-btn:hover {
+            background: var(--table-row-hover);
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 24px 0 20px;
+        }
+
+        .summary-header h2 {
+            font-size: 22px;
+            font-weight: 650;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            background: var(--btn-bg);
+            border: 1px solid var(--border-default);
+            border-radius: 50px;
+            padding: 12px 34px;
+            font-size: 16px;
+            font-weight: 550;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--text-primary);
+        }
+
+        .copy-btn:hover {
+            background: var(--table-row-hover);
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px 30px;
+            border: 1px solid var(--border-default);
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            min-height: 100px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card:empty::before {
+            content: "📌 Kết quả tóm tắt sẽ hiển thị tại đây";
+            color: #9ac7e8;
+            font-style: italic;
+        }
+
+        .stats-badge {
+            background: var(--badge-bg);
+            border-radius: 70px;
+            padding: 10px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            border: 1px solid var(--border-default);
+        }
+
+        .table-container {
+            border-radius: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-default);
+            overflow: hidden;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .table-container.hidden {
+            display: none;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #9ac7e8 #d4e6ff;
+        }
+
+        .table-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-scroll::-webkit-scrollbar-track {
+            background: #d4e6ff;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #9ac7e8;
+            border-radius: 12px;
+        }
+
+        body.dark-mode .table-scroll::-webkit-scrollbar-track {
+            background: #2b4f7b;
+        }
+
+        body.dark-mode .table-scroll::-webkit-scrollbar-thumb {
+            background: #3f6790;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            min-width: 600px;
+        }
+
+        th {
+            background: var(--table-header-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 16px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border-default);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-default);
+            color: var(--text-primary);
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--table-row-even);
+        }
+
+        tbody tr:hover td {
+            background-color: var(--table-row-hover);
+            transition: background 0.2s;
+        }
+
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--toast-bg);
+            color: #fff;
+            padding: 16px 40px;
+            border-radius: 70px;
+            font-weight: 550;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+            animation: toastSlide 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 16px;
+        }
+
+        body.dark-mode .toast-message {
+            color: #1e3a5f;
+        }
+
+        @keyframes toastSlide {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .toast-message.fade-out {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 800px) {
+            .container { padding: 24px; }
+            .app-header { flex-wrap: wrap; justify-content: center; }
+            .app-header h1 { font-size: 24px; text-align: center; }
+            .theme-toggle { position: static; transform: none; }
+            .btn { padding: 12px 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1>TÓM TẮT KẾT QUẢ CẬN LÂM SÀNG</h1>
+            <div class="theme-toggle" id="themeToggle" title="Chuyển giao diện">
+                <i class="fas fa-sun"></i>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-label">
+                <span><i class="fas fa-keyboard"></i> Dữ liệu nguồn (paste từ bảng tính)</span>
+                <span class="stats-badge" id="rowCountBadge"><i class="fas fa-database"></i> 0 chỉ số</span>
+            </div>
+            <div class="textarea-wrapper">
+                <textarea id="dataInput" placeholder="Ví dụ:&#10;1	H01	Số lượng hồng cầu	x10^12/lít	-	4.31&#10;2	H02	Huyết sắc tố	g/l	-	138&#10;3	H03	Hematocrit	%	-	0.42"></textarea>
+            </div>
+            <div class="button-strip">
+                <button class="btn btn-primary" id="summarizeBtn"><i class="fas fa-flask"></i> Tóm tắt</button>
+                <button class="btn btn-outline" id="clearBtn"><i class="fas fa-trash-alt"></i> Xóa</button>
+            </div>
+        </div>
+
+        <div class="summary-header">
+            <h2><i class="fas fa-clipboard-check"></i> Kết quả tóm tắt</h2>
+            <div class="copy-btn" id="copySummaryBtn"><i class="far fa-copy"></i> Sao chép</div>
+        </div>
+        <div class="summary-card" id="summaryText"></div>
+
+        <div style="display: flex; justify-content: flex-start;">
+            <div class="toggle-table-btn" id="toggleTableBtn">
+                <i class="fas fa-chevron-right" id="toggleIcon"></i> Hiển thị bảng
+            </div>
+        </div>
+
+        <div id="tableContainer" class="table-container hidden">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã</th>
+                            <th>Tên chỉ số</th>
+                            <th>Đơn vị</th>
+                            <th>Giá trị</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const SPECIAL_NAMES = [
+                "Số lượng hồng cầu",
+                "Huyết sắc tố",
+                "Hematocrit",
+                "Số lượng tiểu cầu",
+                "Số lượng bạch cầu",
+                "Tỷ lệ bạch cầu GR"
+            ];
+
+            function cleanName(rawName) {
+                if (!rawName) return '';
+                let trimmed = rawName.trim().replace(/^["']|["']$/g, '');
+                const match = trimmed.match(/^\([^)]+\)\s*(.*)/);
+                return match ? match[1].trim() : trimmed;
+            }
+
+            const dataInput = document.getElementById('dataInput');
+            const summaryDiv = document.getElementById('summaryText');
+            const rowCountBadge = document.getElementById('rowCountBadge');
+            const tableBody = document.getElementById('tableBody');
+            const copyBtn = document.getElementById('copySummaryBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const summarizeBtn = document.getElementById('summarizeBtn');
+            const themeToggle = document.getElementById('themeToggle');
+            const toggleTableBtn = document.getElementById('toggleTableBtn');
+            const tableContainer = document.getElementById('tableContainer');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            let currentRows = [];
+
+            function showToast(message) {
+                const existing = document.querySelector('.toast-message');
+                if (existing) existing.remove();
+                const toast = document.createElement('div');
+                toast.className = 'toast-message';
+                toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('fade-out');
+                    setTimeout(() => toast.remove(), 400);
+                }, 2000);
+            }
+
+            function parseInput() {
+                const raw = dataInput.value;
+                if (!raw.trim()) return [];
+
+                const lines = raw.split(/\r?\n/).filter(line => line.trim() !== '');
+                const rows = [];
+
+                for (let line of lines) {
+                    const cols = line.split('\t').map(s => s.trim());
+                    if (cols.length < 6) continue;
+
+                    const stt = cols[0];
+                    if (!/^\d+$/.test(stt)) continue;
+
+                    const ma = cols[1] || '';
+                    const ten = cols[2] || '';
+                    const donvi = cols[3] || '';
+                    const giatri = cols[5] || '';
+
+                    if (!ten || !giatri) continue;
+
+                    rows.push({
+                        stt,
+                        ma,
+                        ten,
+                        cleanTen: cleanName(ten),
+                        donvi,
+                        giatri
+                    });
+                }
+                return rows;
+            }
+
+            function generateSummary(rows) {
+                if (!rows.length) return 'Chưa có dữ liệu.';
+
+                const hasSpecial = rows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
+                const filtered = hasSpecial
+                    ? rows.filter(r => SPECIAL_NAMES.includes(r.cleanTen))
+                    : rows;
+
+                const pairs = filtered.map(r => `${r.cleanTen} ${r.giatri}`);
+                return pairs.join(', ') || 'Không tìm thấy chỉ số nào.';
+            }
+
+            function renderTable() {
+                rowCountBadge.innerHTML = `<i class="fas fa-database"></i> ${currentRows.length} chỉ số`;
+
+                tableBody.innerHTML = '';
+                currentRows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.stt}</td>
+                        <td>${row.ma}</td>
+                        <td>${row.ten}</td>
+                        <td>${row.donvi}</td>
+                        <td>${row.giatri}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            }
+
+            function updateUI() {
+                renderTable();
+                summaryDiv.innerText = generateSummary(currentRows);
+            }
+
+            function summarize() {
+                currentRows = parseInput();
+                updateUI();
+            }
+
+            function clearData() {
+                dataInput.value = '';
+                currentRows = [];
+                updateUI();
+                showToast('Đã xóa toàn bộ dữ liệu');
+            }
+
+            function copySummary() {
+                const content = summaryDiv.innerText;
+                if (!content || content === 'Chưa có dữ liệu.') {
+                    showToast('Không có nội dung để sao chép');
+                    return;
+                }
+                navigator.clipboard.writeText(content)
+                    .then(() => showToast('Đã sao chép tóm tắt!'))
+                    .catch(() => showToast('Sao chép thất bại'));
+            }
+
+            const body = document.body;
+            const iconTheme = themeToggle.querySelector('i');
+
+            function setTheme(isDark) {
+                if (isDark) {
+                    body.classList.add('dark-mode');
+                    iconTheme.className = 'fas fa-moon';
+                } else {
+                    body.classList.remove('dark-mode');
+                    iconTheme.className = 'fas fa-sun';
+                }
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            }
+
+            setTheme(localStorage.getItem('theme') === 'dark');
+
+            themeToggle.addEventListener('click', () => {
+                setTheme(!body.classList.contains('dark-mode'));
+            });
+
+            toggleTableBtn.addEventListener('click', () => {
+                if (tableContainer.classList.contains('hidden')) {
+                    tableContainer.classList.remove('hidden');
+                    toggleIcon.className = 'fas fa-chevron-down';
+                    toggleTableBtn.innerHTML = '<i class="fas fa-chevron-down" id="toggleIcon"></i> Ẩn bảng';
+                } else {
+                    tableContainer.classList.add('hidden');
+                    toggleIcon.className = 'fas fa-chevron-right';
+                    toggleTableBtn.innerHTML = '<i class="fas fa-chevron-right" id="toggleIcon"></i> Hiển thị bảng';
+                }
+            });
+
+            summarizeBtn.addEventListener('click', () => {
+                summarizeBtn.disabled = true;
+                const original = summarizeBtn.innerHTML;
+                summarizeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý...';
+                setTimeout(() => {
+                    summarize();
+                    summarizeBtn.disabled = false;
+                    summarizeBtn.innerHTML = original;
+                }, 50);
+            });
+
+            clearBtn.addEventListener('click', clearData);
+            copyBtn.addEventListener('click', copySummary);
+
+            updateUI();
+        })();
+    </script>
+</body>
+</html>
