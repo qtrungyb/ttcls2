@@ -299,7 +299,7 @@
             padding: 16px 20px;
             align-items: center;
             flex-wrap: wrap;
-            justify-content: center;   /* căn giữa các nút và badge */
+            justify-content: center;
             border-bottom: 1px solid var(--border-default);
             background: var(--card-bg);
         }
@@ -490,7 +490,6 @@
         </div>
 
         <div id="tableContainer" class="table-container hidden">
-            <!-- Thanh công cụ cho bảng: căn giữa -->
             <div class="table-controls">
                 <button class="btn btn-outline" id="selectMainBtn" title="Chọn các chỉ số chính (theo danh sách mặc định)"><i class="fas fa-star"></i> Chọn chỉ số chính</button>
                 <button class="btn btn-outline" id="selectAllBtn"><i class="fas fa-check-square"></i> Chọn tất cả</button>
@@ -522,7 +521,6 @@
 
     <script>
         (function() {
-            // ==================== DANH SÁCH CHỈ SỐ CHÍNH ====================
             const SPECIAL_NAMES = [
                 "Số lượng hồng cầu",
                 "Huyết sắc tố",
@@ -539,7 +537,6 @@
                 return match ? match[1].trim() : trimmed;
             }
 
-            // ==================== DOM ELEMENTS ====================
             const dataInput = document.getElementById('dataInput');
             const summaryDiv = document.getElementById('summaryText');
             const rowCountBadge = document.getElementById('rowCountBadge');
@@ -557,10 +554,8 @@
             const selectedCountBadge = document.getElementById('selectedCountBadge');
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
-            // ==================== STATE ====================
-            let currentRows = [];               // mảng các dòng { stt, ma, ten, cleanTen, donvi, giatri, selected }
+            let currentRows = [];
 
-            // ==================== HÀM TIỆN ÍCH ====================
             function showToast(message) {
                 const existing = document.querySelector('.toast-message');
                 if (existing) existing.remove();
@@ -574,7 +569,6 @@
                 }, 2000);
             }
 
-            // Parse dữ liệu từ textarea, tạo mảng currentRows, đồng thời gán selected theo logic cũ
             function parseInput() {
                 const raw = dataInput.value;
                 if (!raw.trim()) return [];
@@ -603,11 +597,10 @@
                         cleanTen: cleanName(ten),
                         donvi,
                         giatri,
-                        selected: false   // sẽ gán sau
+                        selected: false
                     });
                 }
 
-                // Logic chọn mặc định: nếu có ít nhất một chỉ số trong SPECIAL_NAMES, chỉ chọn những chỉ số đó; ngược lại chọn tất cả.
                 const hasSpecial = rows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
                 rows.forEach(row => {
                     row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
@@ -616,7 +609,6 @@
                 return rows;
             }
 
-            // Tạo chuỗi tóm tắt từ các dòng được chọn
             function generateSummary(rows) {
                 const selectedRows = rows.filter(r => r.selected);
                 if (!selectedRows.length) return 'Chưa chọn chỉ số nào để tóm tắt.';
@@ -624,7 +616,6 @@
                 return pairs.join(', ');
             }
 
-            // Cập nhật badge tổng số và số chọn
             function updateCountBadges() {
                 const total = currentRows.length;
                 const selected = currentRows.filter(r => r.selected).length;
@@ -632,16 +623,13 @@
                 selectedCountBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${selected}/${total}`;
             }
 
-            // Gán sự kiện cho các checkbox dòng và checkbox "Chọn tất cả" (gọi sau mỗi lần render bảng)
             function attachCheckboxEvents() {
-                // Sự kiện cho checkbox "Chọn tất cả"
                 const selectAll = document.getElementById('selectAllCheckbox');
                 if (selectAll) {
                     selectAll.removeEventListener('change', handleSelectAllChange);
                     selectAll.addEventListener('change', handleSelectAllChange);
                 }
 
-                // Sự kiện cho từng checkbox dòng
                 const rowCheckboxes = document.querySelectorAll('.row-checkbox');
                 rowCheckboxes.forEach(cb => {
                     cb.removeEventListener('change', handleRowCheckboxChange);
@@ -652,7 +640,7 @@
             function handleSelectAllChange(e) {
                 const checked = e.target.checked;
                 currentRows.forEach(row => row.selected = checked);
-                renderTable();  // re-render để đồng bộ
+                renderTable();
                 updateSummaryAndBadge();
             }
 
@@ -660,19 +648,16 @@
                 const index = e.target.dataset.index;
                 if (index !== undefined) {
                     currentRows[index].selected = e.target.checked;
-                    // Cập nhật trạng thái checkbox "Chọn tất cả"
                     const selectAll = document.getElementById('selectAllCheckbox');
                     if (selectAll) {
                         const allSelected = currentRows.length > 0 && currentRows.every(r => r.selected);
                         selectAll.checked = allSelected;
                     }
                     updateCountBadges();
-                    // Cập nhật phần tóm tắt ngay (có thể gọi updateSummary)
                     summaryDiv.innerText = generateSummary(currentRows);
                 }
             }
 
-            // Render bảng từ currentRows
             function renderTable() {
                 tableBody.innerHTML = '';
                 currentRows.forEach((row, index) => {
@@ -688,13 +673,9 @@
                     tableBody.appendChild(tr);
                 });
 
-                // Cập nhật badge
                 updateCountBadges();
-
-                // Gán lại sự kiện cho các checkbox vừa tạo
                 attachCheckboxEvents();
 
-                // Đồng bộ trạng thái checkbox "Chọn tất cả"
                 const selectAll = document.getElementById('selectAllCheckbox');
                 if (selectAll) {
                     const allSelected = currentRows.length > 0 && currentRows.every(r => r.selected);
@@ -702,20 +683,17 @@
                 }
             }
 
-            // Cập nhật summary và badges sau khi thay đổi số lượng dòng
             function updateSummaryAndBadge() {
                 summaryDiv.innerText = generateSummary(currentRows);
                 updateCountBadges();
             }
 
-            // Hàm chính: đọc input, parse, render
             function refreshFromInput() {
                 currentRows = parseInput();
                 renderTable();
                 summaryDiv.innerText = generateSummary(currentRows);
             }
 
-            // ==================== SỰ KIỆN NÚT ====================
             summarizeBtn.addEventListener('click', () => {
                 const parsed = parseInput();
                 if (parsed.length === 0) {
@@ -756,7 +734,6 @@
                     .catch(() => showToast('Sao chép thất bại'));
             });
 
-            // Nút chọn chỉ số chính (theo SPECIAL_NAMES)
             selectMainBtn.addEventListener('click', () => {
                 const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
                 currentRows.forEach(row => {
@@ -781,7 +758,6 @@
                 showToast('Đã bỏ chọn tất cả');
             });
 
-            // ==================== TOGGLE BẢNG ====================
             toggleTableBtn.addEventListener('click', () => {
                 if (tableContainer.classList.contains('hidden')) {
                     tableContainer.classList.remove('hidden');
@@ -794,7 +770,6 @@
                 }
             });
 
-            // ==================== DARK MODE ====================
             const body = document.body;
             const iconTheme = themeToggle.querySelector('i');
             function setTheme(isDark) {
@@ -812,7 +787,6 @@
                 setTheme(!body.classList.contains('dark-mode'));
             });
 
-            // ==================== KHỞI TẠO ====================
             currentRows = parseInput();
             renderTable();
             summaryDiv.innerText = generateSummary(currentRows);
