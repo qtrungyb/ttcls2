@@ -293,6 +293,22 @@
             display: none;
         }
 
+        .table-controls {
+            display: flex;
+            gap: 16px;
+            padding: 16px 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;   /* căn giữa các nút và badge */
+            border-bottom: 1px solid var(--border-default);
+            background: var(--card-bg);
+        }
+
+        .table-controls .btn {
+            padding: 10px 24px;
+            font-size: 14px;
+        }
+
         .table-scroll {
             overflow-x: auto;
             max-height: 400px;
@@ -327,7 +343,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 15px;
-            min-width: 600px;
+            min-width: 650px;
         }
 
         th {
@@ -349,6 +365,18 @@
             padding: 14px 12px;
             border-bottom: 1px solid var(--border-default);
             color: var(--text-primary);
+        }
+
+        td:first-child, th:first-child {
+            text-align: center;
+            width: 40px;
+        }
+
+        input[type=checkbox] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--border-focus);
         }
 
         tbody tr:nth-child(even) {
@@ -394,7 +422,6 @@
             transition: all 0.3s;
         }
 
-        /* Footer ghi chú */
         .footer-note {
             text-align: center;
             margin-top: 40px;
@@ -463,10 +490,18 @@
         </div>
 
         <div id="tableContainer" class="table-container hidden">
+            <!-- Thanh công cụ cho bảng: căn giữa -->
+            <div class="table-controls">
+                <button class="btn btn-outline" id="selectMainBtn" title="Chọn các chỉ số chính (theo danh sách mặc định)"><i class="fas fa-star"></i> Chọn chỉ số chính</button>
+                <button class="btn btn-outline" id="selectAllBtn"><i class="fas fa-check-square"></i> Chọn tất cả</button>
+                <button class="btn btn-outline" id="deselectAllBtn"><i class="fas fa-square"></i> Bỏ chọn tất cả</button>
+                <span class="stats-badge" id="selectedCountBadge"><i class="fas fa-check-circle"></i> 0/0</span>
+            </div>
             <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
+                            <th><input type="checkbox" id="selectAllCheckbox"></th>
                             <th>STT</th>
                             <th>Mã</th>
                             <th>Tên chỉ số</th>
@@ -479,7 +514,6 @@
             </div>
         </div>
 
-        <!-- Dòng ghi chú theo yêu cầu -->
         <div class="footer-note">
             <span>📋 Nếu cần tóm tắt cận lâm sàng trong y lệnh ngoại trú, vui lòng </span>
             <a href="https://qtrungyb.github.io/ttcls/" target="_blank">VÀO ĐÂY</a>
@@ -488,6 +522,7 @@
 
     <script>
         (function() {
+            // ==================== DANH SÁCH CHỈ SỐ CHÍNH ====================
             const SPECIAL_NAMES = [
                 "Số lượng hồng cầu",
                 "Huyết sắc tố",
@@ -504,6 +539,7 @@
                 return match ? match[1].trim() : trimmed;
             }
 
+            // ==================== DOM ELEMENTS ====================
             const dataInput = document.getElementById('dataInput');
             const summaryDiv = document.getElementById('summaryText');
             const rowCountBadge = document.getElementById('rowCountBadge');
@@ -515,9 +551,16 @@
             const toggleTableBtn = document.getElementById('toggleTableBtn');
             const tableContainer = document.getElementById('tableContainer');
             const toggleIcon = document.getElementById('toggleIcon');
+            const selectMainBtn = document.getElementById('selectMainBtn');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            const selectedCountBadge = document.getElementById('selectedCountBadge');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
-            let currentRows = [];
+            // ==================== STATE ====================
+            let currentRows = [];               // mảng các dòng { stt, ma, ten, cleanTen, donvi, giatri, selected }
 
+            // ==================== HÀM TIỆN ÍCH ====================
             function showToast(message) {
                 const existing = document.querySelector('.toast-message');
                 if (existing) existing.remove();
@@ -531,6 +574,7 @@
                 }, 2000);
             }
 
+            // Parse dữ liệu từ textarea, tạo mảng currentRows, đồng thời gán selected theo logic cũ
             function parseInput() {
                 const raw = dataInput.value;
                 if (!raw.trim()) return [];
@@ -558,31 +602,83 @@
                         ten,
                         cleanTen: cleanName(ten),
                         donvi,
-                        giatri
+                        giatri,
+                        selected: false   // sẽ gán sau
                     });
                 }
+
+                // Logic chọn mặc định: nếu có ít nhất một chỉ số trong SPECIAL_NAMES, chỉ chọn những chỉ số đó; ngược lại chọn tất cả.
+                const hasSpecial = rows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
+                rows.forEach(row => {
+                    row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
+                });
+
                 return rows;
             }
 
+            // Tạo chuỗi tóm tắt từ các dòng được chọn
             function generateSummary(rows) {
-                if (!rows.length) return 'Chưa có dữ liệu.';
-
-                const hasSpecial = rows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
-                const filtered = hasSpecial
-                    ? rows.filter(r => SPECIAL_NAMES.includes(r.cleanTen))
-                    : rows;
-
-                const pairs = filtered.map(r => `${r.cleanTen} ${r.giatri}`);
-                return pairs.join(', ') || 'Không tìm thấy chỉ số nào.';
+                const selectedRows = rows.filter(r => r.selected);
+                if (!selectedRows.length) return 'Chưa chọn chỉ số nào để tóm tắt.';
+                const pairs = selectedRows.map(r => `${r.cleanTen} ${r.giatri}`);
+                return pairs.join(', ');
             }
 
-            function renderTable() {
-                rowCountBadge.innerHTML = `<i class="fas fa-database"></i> ${currentRows.length} chỉ số`;
+            // Cập nhật badge tổng số và số chọn
+            function updateCountBadges() {
+                const total = currentRows.length;
+                const selected = currentRows.filter(r => r.selected).length;
+                rowCountBadge.innerHTML = `<i class="fas fa-database"></i> ${total} chỉ số`;
+                selectedCountBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${selected}/${total}`;
+            }
 
+            // Gán sự kiện cho các checkbox dòng và checkbox "Chọn tất cả" (gọi sau mỗi lần render bảng)
+            function attachCheckboxEvents() {
+                // Sự kiện cho checkbox "Chọn tất cả"
+                const selectAll = document.getElementById('selectAllCheckbox');
+                if (selectAll) {
+                    selectAll.removeEventListener('change', handleSelectAllChange);
+                    selectAll.addEventListener('change', handleSelectAllChange);
+                }
+
+                // Sự kiện cho từng checkbox dòng
+                const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+                rowCheckboxes.forEach(cb => {
+                    cb.removeEventListener('change', handleRowCheckboxChange);
+                    cb.addEventListener('change', handleRowCheckboxChange);
+                });
+            }
+
+            function handleSelectAllChange(e) {
+                const checked = e.target.checked;
+                currentRows.forEach(row => row.selected = checked);
+                renderTable();  // re-render để đồng bộ
+                updateSummaryAndBadge();
+            }
+
+            function handleRowCheckboxChange(e) {
+                const index = e.target.dataset.index;
+                if (index !== undefined) {
+                    currentRows[index].selected = e.target.checked;
+                    // Cập nhật trạng thái checkbox "Chọn tất cả"
+                    const selectAll = document.getElementById('selectAllCheckbox');
+                    if (selectAll) {
+                        const allSelected = currentRows.length > 0 && currentRows.every(r => r.selected);
+                        selectAll.checked = allSelected;
+                    }
+                    updateCountBadges();
+                    // Cập nhật phần tóm tắt ngay (có thể gọi updateSummary)
+                    summaryDiv.innerText = generateSummary(currentRows);
+                }
+            }
+
+            // Render bảng từ currentRows
+            function renderTable() {
                 tableBody.innerHTML = '';
-                currentRows.forEach(row => {
+                currentRows.forEach((row, index) => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
+                        <td><input type="checkbox" class="row-checkbox" data-index="${index}" ${row.selected ? 'checked' : ''}></td>
                         <td>${row.stt}</td>
                         <td>${row.ma}</td>
                         <td>${row.ten}</td>
@@ -591,56 +687,101 @@
                     `;
                     tableBody.appendChild(tr);
                 });
+
+                // Cập nhật badge
+                updateCountBadges();
+
+                // Gán lại sự kiện cho các checkbox vừa tạo
+                attachCheckboxEvents();
+
+                // Đồng bộ trạng thái checkbox "Chọn tất cả"
+                const selectAll = document.getElementById('selectAllCheckbox');
+                if (selectAll) {
+                    const allSelected = currentRows.length > 0 && currentRows.every(r => r.selected);
+                    selectAll.checked = allSelected;
+                }
             }
 
-            function updateUI() {
+            // Cập nhật summary và badges sau khi thay đổi số lượng dòng
+            function updateSummaryAndBadge() {
+                summaryDiv.innerText = generateSummary(currentRows);
+                updateCountBadges();
+            }
+
+            // Hàm chính: đọc input, parse, render
+            function refreshFromInput() {
+                currentRows = parseInput();
                 renderTable();
                 summaryDiv.innerText = generateSummary(currentRows);
             }
 
-            function summarize() {
-                currentRows = parseInput();
-                updateUI();
-            }
+            // ==================== SỰ KIỆN NÚT ====================
+            summarizeBtn.addEventListener('click', () => {
+                const parsed = parseInput();
+                if (parsed.length === 0) {
+                    showToast('Không có dữ liệu để tóm tắt');
+                    return;
+                }
+                summarizeBtn.disabled = true;
+                const original = summarizeBtn.innerHTML;
+                summarizeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý...';
+                setTimeout(() => {
+                    refreshFromInput();
+                    summarizeBtn.disabled = false;
+                    summarizeBtn.innerHTML = original;
+                    showToast('Đã tóm tắt');
+                }, 50);
+            });
 
-            function clearData() {
+            clearBtn.addEventListener('click', () => {
+                if (dataInput.value.trim() === '' && currentRows.length === 0) {
+                    showToast('Không có dữ liệu để xóa');
+                    return;
+                }
                 dataInput.value = '';
                 currentRows = [];
-                updateUI();
+                renderTable();
+                summaryDiv.innerText = '';
                 showToast('Đã xóa toàn bộ dữ liệu');
-            }
+            });
 
-            function copySummary() {
+            copyBtn.addEventListener('click', () => {
                 const content = summaryDiv.innerText;
-                if (!content || content === 'Chưa có dữ liệu.') {
+                if (!content || content === 'Chưa chọn chỉ số nào để tóm tắt.') {
                     showToast('Không có nội dung để sao chép');
                     return;
                 }
                 navigator.clipboard.writeText(content)
                     .then(() => showToast('Đã sao chép tóm tắt!'))
                     .catch(() => showToast('Sao chép thất bại'));
-            }
-
-            const body = document.body;
-            const iconTheme = themeToggle.querySelector('i');
-
-            function setTheme(isDark) {
-                if (isDark) {
-                    body.classList.add('dark-mode');
-                    iconTheme.className = 'fas fa-moon';
-                } else {
-                    body.classList.remove('dark-mode');
-                    iconTheme.className = 'fas fa-sun';
-                }
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            }
-
-            setTheme(localStorage.getItem('theme') === 'dark');
-
-            themeToggle.addEventListener('click', () => {
-                setTheme(!body.classList.contains('dark-mode'));
             });
 
+            // Nút chọn chỉ số chính (theo SPECIAL_NAMES)
+            selectMainBtn.addEventListener('click', () => {
+                const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
+                currentRows.forEach(row => {
+                    row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
+                });
+                renderTable();
+                summaryDiv.innerText = generateSummary(currentRows);
+                showToast('Đã chọn chỉ số chính');
+            });
+
+            selectAllBtn.addEventListener('click', () => {
+                currentRows.forEach(row => row.selected = true);
+                renderTable();
+                summaryDiv.innerText = generateSummary(currentRows);
+                showToast('Đã chọn tất cả');
+            });
+
+            deselectAllBtn.addEventListener('click', () => {
+                currentRows.forEach(row => row.selected = false);
+                renderTable();
+                summaryDiv.innerText = generateSummary(currentRows);
+                showToast('Đã bỏ chọn tất cả');
+            });
+
+            // ==================== TOGGLE BẢNG ====================
             toggleTableBtn.addEventListener('click', () => {
                 if (tableContainer.classList.contains('hidden')) {
                     tableContainer.classList.remove('hidden');
@@ -653,21 +794,28 @@
                 }
             });
 
-            summarizeBtn.addEventListener('click', () => {
-                summarizeBtn.disabled = true;
-                const original = summarizeBtn.innerHTML;
-                summarizeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý...';
-                setTimeout(() => {
-                    summarize();
-                    summarizeBtn.disabled = false;
-                    summarizeBtn.innerHTML = original;
-                }, 50);
+            // ==================== DARK MODE ====================
+            const body = document.body;
+            const iconTheme = themeToggle.querySelector('i');
+            function setTheme(isDark) {
+                if (isDark) {
+                    body.classList.add('dark-mode');
+                    iconTheme.className = 'fas fa-moon';
+                } else {
+                    body.classList.remove('dark-mode');
+                    iconTheme.className = 'fas fa-sun';
+                }
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            }
+            setTheme(localStorage.getItem('theme') === 'dark');
+            themeToggle.addEventListener('click', () => {
+                setTheme(!body.classList.contains('dark-mode'));
             });
 
-            clearBtn.addEventListener('click', clearData);
-            copyBtn.addEventListener('click', copySummary);
-
-            updateUI();
+            // ==================== KHỞI TẠO ====================
+            currentRows = parseInput();
+            renderTable();
+            summaryDiv.innerText = generateSummary(currentRows);
         })();
     </script>
 </body>
