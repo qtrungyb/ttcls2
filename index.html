@@ -9,456 +9,147 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg-body: #e9f0f9;
-            --container-bg: #ffffff;
-            --text-primary: #1e3a5f;
-            --text-secondary: #2b4f7b;
-            --border-default: #cbd5e1;
-            --border-focus: #5f9ea0;
-            --card-bg: #ffffff;
-            --badge-bg: #f0f7ff;
-            --btn-bg: #ffffff;
-            --btn-primary-bg: #2b4f7b;
-            --btn-primary-hover: #1e3a5f;
-            --table-header-bg: #d4e6ff;
-            --table-row-even: #f8fcff;
-            --table-row-hover: #e1efff;
-            --toast-bg: #2b4f7b;
+            --bg-body: #e9f0f9; --container-bg: #ffffff; --text-primary: #1e3a5f; --text-secondary: #2b4f7b;
+            --border-default: #cbd5e1; --border-focus: #5f9ea0; --card-bg: #ffffff; --badge-bg: #f0f7ff;
+            --btn-bg: #ffffff; --btn-primary-bg: #2b4f7b; --btn-primary-hover: #1e3a5f; --table-header-bg: #d4e6ff;
+            --table-row-even: #f8fcff; --table-row-hover: #e1efff; --toast-bg: #2b4f7b;
         }
-
         body.dark-mode {
-            --bg-body: #1a2a3a;
-            --container-bg: #1e3a5f;
-            --text-primary: #f0f7ff;
-            --text-secondary: #b8d4ff;
-            --border-default: #3a5570;
-            --border-focus: #78a7c5;
-            --card-bg: #1e3a5f;
-            --badge-bg: #2b4f7b;
-            --btn-bg: #2b4f7b;
-            --btn-primary-bg: #b8d4ff;
-            --btn-primary-hover: #d4e6ff;
-            --table-header-bg: #2b4f7b;
-            --table-row-even: #1e3a5f;
-            --table-row-hover: #3f6790;
-            --toast-bg: #b8d4ff;
+            --bg-body: #1a2a3a; --container-bg: #1e3a5f; --text-primary: #f0f7ff; --text-secondary: #b8d4ff;
+            --border-default: #3a5570; --border-focus: #78a7c5; --card-bg: #1e3a5f; --badge-bg: #2b4f7b;
+            --btn-bg: #2b4f7b; --btn-primary-bg: #b8d4ff; --btn-primary-hover: #d4e6ff; --table-header-bg: #2b4f7b;
+            --table-row-even: #1e3a5f; --table-row-hover: #3f6790; --toast-bg: #b8d4ff;
         }
-
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg-body);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 24px;
-            color: var(--text-primary);
+            font-family: 'Inter', sans-serif; background: var(--bg-body); min-height: 100vh;
+            display: flex; justify-content: center; align-items: flex-start; padding: 20px; color: var(--text-primary);
             transition: background 0.2s, color 0.2s;
         }
-
         .container {
-            width: 100%;
-            max-width: 1400px;
-            background: var(--container-bg);
-            border-radius: 24px;
-            padding: 32px 40px;
-            border: 1px solid var(--border-default);
+            width: 100%; max-width: 1450px; background: var(--container-bg); border-radius: 28px; padding: 28px 36px;
+            border: 1px solid var(--border-default); box-shadow: 0 8px 24px rgba(0,0,0,0.05);
         }
-
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 28px;
-            position: relative;
-        }
-
-        .app-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-        }
-
+        .app-header { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; position: relative; }
+        .app-header h1 { font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-primary); }
         .theme-toggle {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--btn-bg);
-            border: 1px solid var(--border-default);
-            border-radius: 60px;
-            width: 46px;
-            height: 46px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: var(--text-primary);
-            font-size: 20px;
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%); background: var(--btn-bg);
+            border: 1px solid var(--border-default); border-radius: 60px; width: 46px; height: 46px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            color: var(--text-primary); font-size: 20px;
         }
-
-        .theme-toggle:hover {
-            background: var(--table-row-hover);
-        }
-
+        .theme-toggle:hover { background: var(--table-row-hover); }
         .input-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 18px;
-            padding: 0 6px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+            font-weight: 600; color: var(--text-secondary); font-size: 18px; padding: 0 6px;
         }
-
         textarea {
-            width: 100%;
-            height: 150px;
-            padding: 18px 24px;
-            border: 2px solid var(--border-default);
-            border-radius: 24px;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            font-size: 15px;
-            line-height: 1.6;
-            background: var(--card-bg);
-            resize: vertical;
-            outline: none;
-            transition: border 0.2s;
-            color: var(--text-primary);
+            width: 100%; height: 140px; padding: 18px 24px; border: 2px solid var(--border-default);
+            border-radius: 24px; font-family: 'JetBrains Mono', monospace; font-size: 15px;
+            line-height: 1.6; background: var(--card-bg); resize: vertical; outline: none;
+            transition: border 0.2s; color: var(--text-primary);
         }
-
-        textarea:focus {
-            border-color: var(--border-focus);
-        }
-
-        textarea::placeholder {
-            color: #9ac7e8;
-            opacity: 0.8;
-        }
-
-        body.dark-mode textarea::placeholder {
-            color: #78a7c5;
-        }
-
+        textarea:focus { border-color: var(--border-focus); }
+        textarea::placeholder { color: #9ac7e8; opacity: 0.8; }
+        body.dark-mode textarea::placeholder { color: #78a7c5; }
         .button-strip {
-            display: flex;
-            gap: 24px;
-            margin: 28px 0 24px;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: flex; gap: 20px; margin: 22px 0 20px; justify-content: center; flex-wrap: wrap;
         }
-
         .btn {
-            border: none;
-            padding: 14px 44px;
-            border-radius: 60px;
-            font-size: 16px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-            background: var(--btn-bg);
-            border: 1px solid var(--border-default);
-            color: var(--text-primary);
+            border: none; padding: 12px 36px; border-radius: 60px; font-size: 15px; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s;
+            background: var(--btn-bg); border: 1px solid var(--border-default); color: var(--text-primary);
         }
-
-        .btn-primary {
-            background: var(--btn-primary-bg);
-            border: none;
-            color: #fff;
-        }
-
-        body.dark-mode .btn-primary {
-            color: #1e3a5f;
-        }
-
-        .btn-primary:hover {
-            background: var(--btn-primary-hover);
-        }
-
-        .btn-outline:hover {
-            background: var(--table-row-hover);
-        }
-
-        .toggle-table-btn {
-            background: var(--btn-bg);
-            border: 1px solid var(--border-default);
-            border-radius: 70px;
-            padding: 14px 38px;
-            font-size: 16px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 20px;
-            color: var(--text-primary);
-        }
-
-        .toggle-table-btn:hover {
-            background: var(--table-row-hover);
-        }
-
+        .btn-primary { background: var(--btn-primary-bg); border: none; color: #fff; }
+        body.dark-mode .btn-primary { color: #1e3a5f; }
+        .btn-primary:hover { background: var(--btn-primary-hover); }
+        .btn-outline:hover { background: var(--table-row-hover); }
+        .btn-sm { padding: 8px 18px; font-size: 14px; gap: 6px; }
         .summary-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            margin: 24px 0 20px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 16px 0 18px;
         }
-
-        .summary-header h2 {
-            font-size: 22px;
-            font-weight: 650;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-primary);
+        .summary-header h2 { font-size: 22px; font-weight: 650; display: flex; align-items: center; gap: 10px; color: var(--text-primary); }
+        .summary-actions {
+            display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
         }
-
-        .copy-btn {
-            background: var(--btn-bg);
-            border: 1px solid var(--border-default);
-            border-radius: 50px;
-            padding: 12px 34px;
-            font-size: 16px;
-            font-weight: 550;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: var(--text-primary);
+        .unit-toggle-btn, .copy-btn {
+            background: var(--btn-bg); border: 1px solid var(--border-default); border-radius: 50px;
+            padding: 12px 28px; font-size: 16px; font-weight: 550; display: flex; align-items: center;
+            gap: 10px; cursor: pointer; transition: background 0.2s; color: var(--text-primary);
+            white-space: nowrap;
         }
-
-        .copy-btn:hover {
-            background: var(--table-row-hover);
-        }
-
+        .unit-toggle-btn:hover, .copy-btn:hover { background: var(--table-row-hover); }
         .summary-card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px 30px;
-            border: 1px solid var(--border-default);
-            font-size: 17px;
-            line-height: 1.8;
-            color: var(--text-primary);
-            min-height: 100px;
-            margin-bottom: 24px;
+            background: var(--card-bg); border-radius: 24px; padding: 24px 30px; border: 1px solid var(--border-default);
+            font-size: 17px; line-height: 1.8; color: var(--text-primary); min-height: 100px; margin-bottom: 20px;
+            white-space: pre-wrap; word-break: break-word;
         }
-
-        .summary-card:empty::before {
-            content: "📌 Kết quả tóm tắt sẽ hiển thị tại đây";
-            color: #9ac7e8;
-            font-style: italic;
-        }
-
+        .summary-card:empty::before { content: "Kết quả tóm tắt sẽ hiển thị tại đây"; color: #9ac7e8; font-style: italic; }
         .stats-badge {
-            background: var(--badge-bg);
-            border-radius: 70px;
-            padding: 10px 28px;
-            font-size: 15px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-primary);
-            border: 1px solid var(--border-default);
+            background: var(--badge-bg); border-radius: 70px; padding: 8px 20px; font-size: 14px;
+            font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-default);
         }
-
         .table-container {
-            border-radius: 24px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-default);
-            overflow: hidden;
-            margin-top: 10px;
-            transition: all 0.2s;
+            border-radius: 24px; background: var(--card-bg); border: 1px solid var(--border-default);
+            overflow: hidden; margin-top: 16px; transition: all 0.2s;
         }
-
-        .table-container.hidden {
-            display: none;
-        }
-
+        .table-container.hidden { display: none; }
         .table-controls {
-            display: flex;
-            gap: 16px;
-            padding: 16px 20px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            border-bottom: 1px solid var(--border-default);
-            background: var(--card-bg);
+            display: flex; gap: 12px; padding: 14px 20px; align-items: center; flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-default); background: var(--card-bg);
         }
-
-        .table-controls .btn {
-            padding: 10px 24px;
-            font-size: 14px;
-        }
-
         .table-scroll {
-            overflow-x: auto;
-            max-height: 400px;
-            overflow-y: auto;
-            scrollbar-width: thin;
+            overflow-x: auto; max-height: 400px; overflow-y: auto; scrollbar-width: thin;
             scrollbar-color: #9ac7e8 #d4e6ff;
         }
-
-        .table-scroll::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        .table-scroll::-webkit-scrollbar-track {
-            background: #d4e6ff;
-        }
-
-        .table-scroll::-webkit-scrollbar-thumb {
-            background: #9ac7e8;
-            border-radius: 12px;
-        }
-
-        body.dark-mode .table-scroll::-webkit-scrollbar-track {
-            background: #2b4f7b;
-        }
-
-        body.dark-mode .table-scroll::-webkit-scrollbar-thumb {
-            background: #3f6790;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 15px;
-            min-width: 650px;
-        }
-
+        .table-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-scroll::-webkit-scrollbar-track { background: #d4e6ff; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #9ac7e8; border-radius: 12px; }
+        body.dark-mode .table-scroll::-webkit-scrollbar-track { background: #2b4f7b; }
+        body.dark-mode .table-scroll::-webkit-scrollbar-thumb { background: #3f6790; }
+        table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 700px; }
         th {
-            background: var(--table-header-bg);
-            color: var(--text-primary);
-            font-weight: 600;
-            padding: 16px 12px;
-            text-align: left;
-            border-bottom: 2px solid var(--border-default);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            background: var(--table-header-bg); color: var(--text-primary); font-weight: 600; padding: 14px 10px;
+            text-align: left; border-bottom: 2px solid var(--border-default); position: sticky; top: 0;
+            z-index: 10; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        td {
-            padding: 14px 12px;
-            border-bottom: 1px solid var(--border-default);
-            color: var(--text-primary);
-        }
-
-        td:first-child, th:first-child {
-            text-align: center;
-            width: 40px;
-        }
-
-        input[type=checkbox] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--border-focus);
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: var(--table-row-even);
-        }
-
-        tbody tr:hover td {
-            background-color: var(--table-row-hover);
-            transition: background 0.2s;
-        }
-
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border-default); color: var(--text-primary); }
+        td:first-child, th:first-child { text-align: center; width: 40px; }
+        input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--border-focus); }
+        tbody tr:nth-child(even) { background-color: var(--table-row-even); }
+        tbody tr:hover td { background-color: var(--table-row-hover); transition: background 0.2s; }
         .toast-message {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--toast-bg);
-            color: #fff;
-            padding: 16px 40px;
-            border-radius: 70px;
-            font-weight: 550;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            z-index: 9999;
-            animation: toastSlide 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 16px;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--toast-bg);
+            color: #fff; padding: 16px 40px; border-radius: 70px; font-weight: 550; display: flex;
+            align-items: center; gap: 16px; z-index: 9999; animation: toastSlide 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2); font-size: 16px;
         }
-
-        body.dark-mode .toast-message {
-            color: #1e3a5f;
-        }
-
+        body.dark-mode .toast-message { color: #1e3a5f; }
         @keyframes toastSlide {
             from { opacity: 0; transform: translateX(-50%) translateY(30px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-
-        .toast-message.fade-out {
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-            transition: all 0.3s;
-        }
-
+        .toast-message.fade-out { opacity: 0; transform: translateX(-50%) translateY(20px); transition: all 0.3s; }
         .footer-note {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 15px;
-            color: var(--text-secondary);
-            border-top: 1px dashed var(--border-default);
-            padding-top: 24px;
+            text-align: center; margin-top: 40px; font-size: 15px; color: var(--text-secondary);
+            border-top: 1px dashed var(--border-default); padding-top: 24px;
         }
-        .footer-note a {
-            color: var(--border-focus);
-            text-decoration: none;
-            font-weight: 600;
-            margin: 0 4px;
-        }
-        .footer-note a:hover {
-            text-decoration: underline;
-        }
-        .footer-note .link-url {
-            font-family: monospace;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
+        .footer-note a { color: var(--border-focus); text-decoration: none; font-weight: 600; margin: 0 4px; }
+        .footer-note a:hover { text-decoration: underline; }
         @media (max-width: 800px) {
-            .container { padding: 24px; }
-            .app-header { flex-wrap: wrap; justify-content: center; }
-            .app-header h1 { font-size: 24px; text-align: center; }
-            .theme-toggle { position: static; transform: none; }
-            .btn { padding: 12px 32px; }
+            .container { padding: 20px; } .app-header { flex-wrap: wrap; justify-content: center; }
+            .app-header h1 { font-size: 22px; } .theme-toggle { position: static; transform: none; margin-top: 10px; }
+            .summary-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .summary-actions { width: 100%; justify-content: flex-start; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="app-header">
-            <h1>TÓM TẮT KẾT QUẢ CẬN LÂM SÀNG</h1>
-            <div class="theme-toggle" id="themeToggle" title="Chuyển giao diện">
+            <h1><i class="fas fa-microscope"></i> TÓM TẮT CẬN LÂM SÀNG</h1>
+            <div class="theme-toggle" id="themeToggle">
                 <i class="fas fa-sun"></i>
             </div>
         </div>
@@ -468,9 +159,8 @@
                 <span><i class="fas fa-keyboard"></i> Chỉ số đầu vào</span>
                 <span class="stats-badge" id="rowCountBadge"><i class="fas fa-database"></i> 0 chỉ số</span>
             </div>
-            <div class="textarea-wrapper">
-                <textarea id="dataInput" placeholder="Ví dụ:&#10;1	H01	Số lượng hồng cầu	x10^12/lít	-	4.31&#10;2	H02	Huyết sắc tố	g/l	-	138&#10;3	H03	Hematocrit	%	-	0.42"></textarea>
-            </div>
+            <textarea id="dataInput" placeholder="Ví dụ:&#10;1	H01	Số lượng hồng cầu	x10^12/lít	-	4.31&#10;2	H02	Huyết sắc tố	g/l	-	138&#10;3	H03	Hematocrit	%	-	0.42"></textarea>
+            
             <div class="button-strip">
                 <button class="btn btn-primary" id="summarizeBtn"><i class="fas fa-flask"></i> Tóm tắt</button>
                 <button class="btn btn-outline" id="clearBtn"><i class="fas fa-trash-alt"></i> Xóa</button>
@@ -479,22 +169,27 @@
 
         <div class="summary-header">
             <h2><i class="fas fa-clipboard-check"></i> Kết quả tóm tắt</h2>
-            <div class="copy-btn" id="copySummaryBtn"><i class="far fa-copy"></i> Sao chép</div>
+            <div class="summary-actions">
+                <div class="unit-toggle-btn" id="unitToggleBtn">
+                    <i class="fas fa-eye-slash" id="unitIcon"></i> <span id="unitText">Hiện đơn vị</span>
+                </div>
+                <div class="copy-btn" id="copySummaryBtn"><i class="far fa-copy"></i> Sao chép</div>
+            </div>
         </div>
         <div class="summary-card" id="summaryText"></div>
 
-        <div style="display: flex; justify-content: flex-start;">
-            <div class="toggle-table-btn" id="toggleTableBtn">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div class="toggle-table-btn" id="toggleTableBtn" role="button" tabindex="0">
                 <i class="fas fa-chevron-right" id="toggleIcon"></i> Hiển thị bảng
             </div>
+            <span class="stats-badge" id="selectedCountBadge"><i class="fas fa-check-circle"></i> 0/0</span>
         </div>
 
         <div id="tableContainer" class="table-container hidden">
             <div class="table-controls">
-                <button class="btn btn-outline" id="selectMainBtn" title="Chọn các chỉ số chính (theo danh sách mặc định)"><i class="fas fa-star"></i> Chọn chỉ số chính</button>
-                <button class="btn btn-outline" id="selectAllBtn"><i class="fas fa-check-square"></i> Chọn tất cả</button>
-                <button class="btn btn-outline" id="deselectAllBtn"><i class="fas fa-square"></i> Bỏ chọn tất cả</button>
-                <span class="stats-badge" id="selectedCountBadge"><i class="fas fa-check-circle"></i> 0/0</span>
+                <button class="btn btn-sm" id="selectMainBtn"><i class="fas fa-star"></i> Chỉ số chính</button>
+                <button class="btn btn-sm" id="selectAllBtn"><i class="fas fa-check-square"></i> Chọn tất cả</button>
+                <button class="btn btn-sm" id="deselectAllBtn"><i class="fas fa-square"></i> Bỏ chọn</button>
             </div>
             <div class="table-scroll">
                 <table>
@@ -514,7 +209,7 @@
         </div>
 
         <div class="footer-note">
-            <span>📋 Nếu cần tóm tắt cận lâm sàng trong y lệnh ngoại trú, vui lòng </span>
+            <span>Nếu cần tóm tắt cận lâm sàng trong y lệnh nội trú, vui lòng </span>
             <a href="https://qtrungyb.github.io/ttcls/" target="_blank">VÀO ĐÂY</a>
         </div>
     </div>
@@ -553,8 +248,12 @@
             const deselectAllBtn = document.getElementById('deselectAllBtn');
             const selectedCountBadge = document.getElementById('selectedCountBadge');
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const unitToggleBtn = document.getElementById('unitToggleBtn');
+            const unitIcon = document.getElementById('unitIcon');
+            const unitText = document.getElementById('unitText');
 
             let currentRows = [];
+            let showUnit = false;
 
             function showToast(message) {
                 const existing = document.querySelector('.toast-message');
@@ -569,6 +268,16 @@
                 }, 2000);
             }
 
+            function updateUnitButton() {
+                if (showUnit) {
+                    unitIcon.className = 'fas fa-eye';
+                    unitText.innerText = 'Ẩn đơn vị';
+                } else {
+                    unitIcon.className = 'fas fa-eye-slash';
+                    unitText.innerText = 'Hiện đơn vị';
+                }
+            }
+
             function parseInput() {
                 const raw = dataInput.value;
                 if (!raw.trim()) return [];
@@ -579,41 +288,22 @@
                 for (let line of lines) {
                     const cols = line.split('\t').map(s => s.trim());
                     if (cols.length < 6) continue;
-
                     const stt = cols[0];
                     if (!/^\d+$/.test(stt)) continue;
-
                     const ma = cols[1] || '';
                     const ten = cols[2] || '';
                     const donvi = cols[3] || '';
                     const giatri = cols[5] || '';
-
                     if (!ten || !giatri) continue;
 
                     rows.push({
-                        stt,
-                        ma,
-                        ten,
+                        stt, ma, ten, 
                         cleanTen: cleanName(ten),
-                        donvi,
-                        giatri,
+                        donvi, giatri,
                         selected: false
                     });
                 }
-
-                const hasSpecial = rows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
-                rows.forEach(row => {
-                    row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
-                });
-
                 return rows;
-            }
-
-            function generateSummary(rows) {
-                const selectedRows = rows.filter(r => r.selected);
-                if (!selectedRows.length) return 'Chưa chọn chỉ số nào để tóm tắt.';
-                const pairs = selectedRows.map(r => `${r.cleanTen} ${r.giatri}`);
-                return pairs.join(', ');
             }
 
             function updateCountBadges() {
@@ -623,47 +313,26 @@
                 selectedCountBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${selected}/${total}`;
             }
 
-            function attachCheckboxEvents() {
-                const selectAll = document.getElementById('selectAllCheckbox');
-                if (selectAll) {
-                    selectAll.removeEventListener('change', handleSelectAllChange);
-                    selectAll.addEventListener('change', handleSelectAllChange);
-                }
-
-                const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-                rowCheckboxes.forEach(cb => {
-                    cb.removeEventListener('change', handleRowCheckboxChange);
-                    cb.addEventListener('change', handleRowCheckboxChange);
+            function generateSummary() {
+                const selectedRows = currentRows.filter(r => r.selected);
+                if (!selectedRows.length) return 'Chưa chọn chỉ số nào để tóm tắt.';
+                
+                const items = selectedRows.map(r => {
+                    let base = `${r.cleanTen} ${r.giatri}`;
+                    if (showUnit && r.donvi && r.donvi !== '-') base += ` ${r.donvi}`;
+                    return base;
                 });
-            }
-
-            function handleSelectAllChange(e) {
-                const checked = e.target.checked;
-                currentRows.forEach(row => row.selected = checked);
-                renderTable();
-                updateSummaryAndBadge();
-            }
-
-            function handleRowCheckboxChange(e) {
-                const index = e.target.dataset.index;
-                if (index !== undefined) {
-                    currentRows[index].selected = e.target.checked;
-                    const selectAll = document.getElementById('selectAllCheckbox');
-                    if (selectAll) {
-                        const allSelected = currentRows.length > 0 && currentRows.every(r => r.selected);
-                        selectAll.checked = allSelected;
-                    }
-                    updateCountBadges();
-                    summaryDiv.innerText = generateSummary(currentRows);
-                }
+                
+                return items.join(', ');
             }
 
             function renderTable() {
                 tableBody.innerHTML = '';
-                currentRows.forEach((row, index) => {
+
+                currentRows.forEach((row, realIdx) => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td><input type="checkbox" class="row-checkbox" data-index="${index}" ${row.selected ? 'checked' : ''}></td>
+                        <td><input type="checkbox" class="row-checkbox" data-real-index="${realIdx}" ${row.selected ? 'checked' : ''}></td>
                         <td>${row.stt}</td>
                         <td>${row.ma}</td>
                         <td>${row.ten}</td>
@@ -673,54 +342,75 @@
                     tableBody.appendChild(tr);
                 });
 
-                updateCountBadges();
-                attachCheckboxEvents();
+                document.querySelectorAll('.row-checkbox').forEach(cb => {
+                    cb.removeEventListener('change', handleRowCheckboxChange);
+                    cb.addEventListener('change', handleRowCheckboxChange);
+                });
 
-                const selectAll = document.getElementById('selectAllCheckbox');
-                if (selectAll) {
-                    const allSelected = currentRows.length > 0 && currentRows.every(r => r.selected);
-                    selectAll.checked = allSelected;
+                const visibleCheckboxes = document.querySelectorAll('.row-checkbox');
+                const allVisibleChecked = visibleCheckboxes.length > 0 && Array.from(visibleCheckboxes).every(cb => cb.checked);
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = allVisibleChecked;
+                    selectAllCheckbox.indeterminate = !allVisibleChecked && Array.from(visibleCheckboxes).some(cb => cb.checked);
                 }
+
+                updateCountBadges();
             }
 
-            function updateSummaryAndBadge() {
-                summaryDiv.innerText = generateSummary(currentRows);
+            function handleRowCheckboxChange(e) {
+                const realIdx = e.target.dataset.realIndex;
+                if (realIdx !== undefined) {
+                    currentRows[realIdx].selected = e.target.checked;
+                }
+                const visibleCheckboxes = document.querySelectorAll('.row-checkbox');
+                const allChecked = visibleCheckboxes.length > 0 && Array.from(visibleCheckboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = !allChecked && Array.from(visibleCheckboxes).some(cb => cb.checked);
+                
+                summaryDiv.innerText = generateSummary();
                 updateCountBadges();
+            }
+
+            function handleSelectAllChange(e) {
+                const checked = e.target.checked;
+                currentRows.forEach(row => row.selected = checked);
+                renderTable();
+                summaryDiv.innerText = generateSummary();
             }
 
             function refreshFromInput() {
                 currentRows = parseInput();
+                const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
+                currentRows.forEach(row => {
+                    row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
+                });
                 renderTable();
-                summaryDiv.innerText = generateSummary(currentRows);
+                summaryDiv.innerText = generateSummary();
             }
 
             summarizeBtn.addEventListener('click', () => {
                 const parsed = parseInput();
                 if (parsed.length === 0) {
-                    showToast('Không có dữ liệu để tóm tắt');
+                    showToast('Không có dữ liệu hợp lệ để tóm tắt');
                     return;
                 }
-                summarizeBtn.disabled = true;
-                const original = summarizeBtn.innerHTML;
-                summarizeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Đang xử lý...';
-                setTimeout(() => {
-                    refreshFromInput();
-                    summarizeBtn.disabled = false;
-                    summarizeBtn.innerHTML = original;
-                    showToast('Đã tóm tắt');
-                }, 50);
+                refreshFromInput();
+                showToast('Đã cập nhật tóm tắt');
             });
 
             clearBtn.addEventListener('click', () => {
-                if (dataInput.value.trim() === '' && currentRows.length === 0) {
-                    showToast('Không có dữ liệu để xóa');
-                    return;
-                }
                 dataInput.value = '';
                 currentRows = [];
                 renderTable();
                 summaryDiv.innerText = '';
-                showToast('Đã xóa toàn bộ dữ liệu');
+                showToast('Đã xóa toàn bộ');
+            });
+
+            unitToggleBtn.addEventListener('click', () => {
+                showUnit = !showUnit;
+                updateUnitButton();
+                summaryDiv.innerText = generateSummary();
+                showToast(showUnit ? 'Đã hiện đơn vị' : 'Đã ẩn đơn vị');
             });
 
             copyBtn.addEventListener('click', () => {
@@ -735,40 +425,42 @@
             });
 
             selectMainBtn.addEventListener('click', () => {
-                const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
                 currentRows.forEach(row => {
-                    row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
+                    row.selected = SPECIAL_NAMES.includes(row.cleanTen);
                 });
                 renderTable();
-                summaryDiv.innerText = generateSummary(currentRows);
+                summaryDiv.innerText = generateSummary();
                 showToast('Đã chọn chỉ số chính');
             });
 
             selectAllBtn.addEventListener('click', () => {
                 currentRows.forEach(row => row.selected = true);
                 renderTable();
-                summaryDiv.innerText = generateSummary(currentRows);
+                summaryDiv.innerText = generateSummary();
                 showToast('Đã chọn tất cả');
             });
 
             deselectAllBtn.addEventListener('click', () => {
                 currentRows.forEach(row => row.selected = false);
                 renderTable();
-                summaryDiv.innerText = generateSummary(currentRows);
+                summaryDiv.innerText = generateSummary();
                 showToast('Đã bỏ chọn tất cả');
             });
 
             toggleTableBtn.addEventListener('click', () => {
-                if (tableContainer.classList.contains('hidden')) {
+                const isHidden = tableContainer.classList.contains('hidden');
+                if (isHidden) {
                     tableContainer.classList.remove('hidden');
                     toggleIcon.className = 'fas fa-chevron-down';
-                    toggleTableBtn.innerHTML = '<i class="fas fa-chevron-down" id="toggleIcon"></i> Ẩn bảng';
+                    toggleTableBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Ẩn bảng';
                 } else {
                     tableContainer.classList.add('hidden');
                     toggleIcon.className = 'fas fa-chevron-right';
-                    toggleTableBtn.innerHTML = '<i class="fas fa-chevron-right" id="toggleIcon"></i> Hiển thị bảng';
+                    toggleTableBtn.innerHTML = '<i class="fas fa-chevron-right"></i> Hiển thị bảng';
                 }
             });
+
+            selectAllCheckbox.addEventListener('change', handleSelectAllChange);
 
             const body = document.body;
             const iconTheme = themeToggle.querySelector('i');
@@ -783,13 +475,12 @@
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
             }
             setTheme(localStorage.getItem('theme') === 'dark');
-            themeToggle.addEventListener('click', () => {
-                setTheme(!body.classList.contains('dark-mode'));
-            });
+            themeToggle.addEventListener('click', () => setTheme(!body.classList.contains('dark-mode')));
 
             currentRows = parseInput();
             renderTable();
-            summaryDiv.innerText = generateSummary(currentRows);
+            summaryDiv.innerText = generateSummary();
+            updateUnitButton();
         })();
     </script>
 </body>
