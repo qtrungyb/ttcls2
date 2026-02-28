@@ -209,7 +209,7 @@
         </div>
 
         <div class="footer-note">
-            <span>Nếu cần tóm tắt cận lâm sàng trong y lệnh ngoại trú, vui lòng </span>
+            <span>Nếu cần tóm tắt cận lâm sàng trong y lệnh nội trú, vui lòng </span>
             <a href="https://qtrungyb.github.io/ttcls/" target="_blank">VÀO ĐÂY</a>
         </div>
     </div>
@@ -253,7 +253,7 @@
             const unitText = document.getElementById('unitText');
 
             let currentRows = [];
-            let showUnit = false;
+            let showUnit = false;  // không lưu trạng thái, mặc định ẩn
 
             function showToast(message) {
                 const existing = document.querySelector('.toast-message');
@@ -388,6 +388,7 @@
                 summaryDiv.innerText = generateSummary();
             }
 
+            // --- Sự kiện ---
             summarizeBtn.addEventListener('click', () => {
                 const parsed = parseInput();
                 if (parsed.length === 0) {
@@ -396,6 +397,8 @@
                 }
                 refreshFromInput();
                 showToast('Đã cập nhật tóm tắt');
+                // Tự động cuộn đến kết quả tóm tắt (cải tiến giữ lại)
+                setTimeout(() => summaryDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
             });
 
             clearBtn.addEventListener('click', () => {
@@ -462,6 +465,7 @@
 
             selectAllCheckbox.addEventListener('change', handleSelectAllChange);
 
+            // --- Chế độ sáng/tối (giữ lại lưu trạng thái) ---
             const body = document.body;
             const iconTheme = themeToggle.querySelector('i');
             function setTheme(isDark) {
@@ -477,7 +481,14 @@
             setTheme(localStorage.getItem('theme') === 'dark');
             themeToggle.addEventListener('click', () => setTheme(!body.classList.contains('dark-mode')));
 
+            // Khởi tạo
             currentRows = parseInput();
+            if (currentRows.length > 0) {
+                const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
+                currentRows.forEach(row => {
+                    row.selected = hasSpecial ? SPECIAL_NAMES.includes(row.cleanTen) : true;
+                });
+            }
             renderTable();
             summaryDiv.innerText = generateSummary();
             updateUnitButton();
