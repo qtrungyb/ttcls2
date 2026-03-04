@@ -73,13 +73,13 @@
         .summary-actions {
             display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
         }
-        .unit-toggle-btn, .copy-btn {
+        .unit-toggle-btn, .abbr-toggle-btn, .copy-btn {
             background: var(--btn-bg); border: 1px solid var(--border-default); border-radius: 50px;
             padding: 12px 28px; font-size: 16px; font-weight: 550; display: flex; align-items: center;
             gap: 10px; cursor: pointer; transition: background 0.2s; color: var(--text-primary);
             white-space: nowrap;
         }
-        .unit-toggle-btn:hover, .copy-btn:hover { background: var(--table-row-hover); }
+        .unit-toggle-btn:hover, .abbr-toggle-btn:hover, .copy-btn:hover { background: var(--table-row-hover); }
         .summary-card {
             background: var(--card-bg); border-radius: 24px; padding: 24px 30px; border: 1px solid var(--border-default);
             font-size: 17px; line-height: 1.8; color: var(--text-primary); min-height: 100px; margin-bottom: 20px;
@@ -170,8 +170,13 @@
         <div class="summary-header">
             <h2><i class="fas fa-clipboard-check"></i> Kết quả tóm tắt</h2>
             <div class="summary-actions">
+                <!-- Nút ẩn/hiện đơn vị -->
                 <div class="unit-toggle-btn" id="unitToggleBtn">
                     <i class="fas fa-eye-slash" id="unitIcon"></i> <span id="unitText">Hiện đơn vị</span>
+                </div>
+                <!-- Nút chuyển đổi viết tắt / tên đầy đủ (thêm mới) -->
+                <div class="abbr-toggle-btn" id="abbrToggleBtn">
+                    <i class="fas fa-font" id="abbrIcon"></i> <span id="abbrText">Tên đầy đủ</span>
                 </div>
                 <div class="copy-btn" id="copySummaryBtn"><i class="far fa-copy"></i> Sao chép</div>
             </div>
@@ -216,6 +221,7 @@
 
     <script>
         (function() {
+            // Danh sách tên đầy đủ của các chỉ số chính (dùng để tự động chọn)
             const SPECIAL_NAMES = [
                 "Số lượng hồng cầu",
                 "Huyết sắc tố",
@@ -224,6 +230,16 @@
                 "Số lượng bạch cầu",
                 "Tỷ lệ bạch cầu GR"
             ];
+
+            // Mapping tên đầy đủ -> viết tắt theo yêu cầu
+            const ABBR_MAP = {
+                "Số lượng hồng cầu": "HC",
+                "Huyết sắc tố": "Hb",
+                "Hematocrit": "HTC",
+                "Số lượng tiểu cầu": "TC",
+                "Số lượng bạch cầu": "BC",
+                "Tỷ lệ bạch cầu GR": "N%"
+            };
 
             function cleanName(rawName) {
                 if (!rawName) return '';
@@ -248,13 +264,20 @@
             const deselectAllBtn = document.getElementById('deselectAllBtn');
             const selectedCountBadge = document.getElementById('selectedCountBadge');
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            // Nút đơn vị
             const unitToggleBtn = document.getElementById('unitToggleBtn');
             const unitIcon = document.getElementById('unitIcon');
             const unitText = document.getElementById('unitText');
+            // Nút viết tắt
+            const abbrToggleBtn = document.getElementById('abbrToggleBtn');
+            const abbrIcon = document.getElementById('abbrIcon');
+            const abbrText = document.getElementById('abbrText');
 
             let currentRows = [];
-            let showUnit = false;  // không lưu trạng thái, mặc định ẩn
+            let showUnit = false;          // ẩn đơn vị mặc định
+            let useAbbreviation = true;    // không viết tắt mặc định
 
+            // ----- Hàm toast -----
             function showToast(message) {
                 const existing = document.querySelector('.toast-message');
                 if (existing) existing.remove();
@@ -268,6 +291,7 @@
                 }, 2000);
             }
 
+            // Cập nhật giao diện nút đơn vị
             function updateUnitButton() {
                 if (showUnit) {
                     unitIcon.className = 'fas fa-eye';
@@ -278,6 +302,18 @@
                 }
             }
 
+            // Cập nhật giao diện nút viết tắt
+            function updateAbbrButton() {
+                if (useAbbreviation) {
+                    abbrIcon.className = 'fas fa-font';  // icon khi bật viết tắt
+                    abbrText.innerText = 'Tên đầy đủ';
+                } else {
+                    abbrIcon.className = 'fas fa-i-cursor';
+                    abbrText.innerText = 'Viết tắt';
+                }
+            }
+
+            // Parse dữ liệu từ textarea
             function parseInput() {
                 const raw = dataInput.value;
                 if (!raw.trim()) return [];
@@ -306,6 +342,7 @@
                 return rows;
             }
 
+            // Cập nhật badge tổng số / đã chọn
             function updateCountBadges() {
                 const total = currentRows.length;
                 const selected = currentRows.filter(r => r.selected).length;
@@ -313,12 +350,18 @@
                 selectedCountBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${selected}/${total}`;
             }
 
+            // Tạo chuỗi tóm tắt dựa trên currentRows, showUnit, useAbbreviation
             function generateSummary() {
                 const selectedRows = currentRows.filter(r => r.selected);
                 if (!selectedRows.length) return 'Chưa chọn chỉ số nào để tóm tắt.';
                 
                 const items = selectedRows.map(r => {
-                    let base = `${r.cleanTen} ${r.giatri}`;
+                    // Xử lý tên (viết tắt hoặc đầy đủ)
+                    let nameToShow = r.cleanTen;
+                    if (useAbbreviation && ABBR_MAP[nameToShow]) {
+                        nameToShow = ABBR_MAP[nameToShow];
+                    }
+                    let base = `${nameToShow} ${r.giatri}`;
                     if (showUnit && r.donvi && r.donvi !== '-') base += ` ${r.donvi}`;
                     return base;
                 });
@@ -326,6 +369,7 @@
                 return items.join(', ');
             }
 
+            // Vẽ lại bảng
             function renderTable() {
                 tableBody.innerHTML = '';
 
@@ -357,6 +401,7 @@
                 updateCountBadges();
             }
 
+            // Xử lý checkbox từng dòng
             function handleRowCheckboxChange(e) {
                 const realIdx = e.target.dataset.realIndex;
                 if (realIdx !== undefined) {
@@ -367,10 +412,11 @@
                 selectAllCheckbox.checked = allChecked;
                 selectAllCheckbox.indeterminate = !allChecked && Array.from(visibleCheckboxes).some(cb => cb.checked);
                 
-                summaryDiv.innerText = generateSummary();
+                summaryDiv.innerText = generateSummary();   // cập nhật tóm tắt
                 updateCountBadges();
             }
 
+            // Xử lý checkbox "chọn tất cả" ở header
             function handleSelectAllChange(e) {
                 const checked = e.target.checked;
                 currentRows.forEach(row => row.selected = checked);
@@ -378,6 +424,7 @@
                 summaryDiv.innerText = generateSummary();
             }
 
+            // Làm mới dữ liệu từ input, tự động chọn (chỉ số chính nếu có, nếu không chọn hết)
             function refreshFromInput() {
                 currentRows = parseInput();
                 const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
@@ -388,7 +435,7 @@
                 summaryDiv.innerText = generateSummary();
             }
 
-            // --- Sự kiện ---
+            // ----- Sự kiện -----
             summarizeBtn.addEventListener('click', () => {
                 const parsed = parseInput();
                 if (parsed.length === 0) {
@@ -397,7 +444,6 @@
                 }
                 refreshFromInput();
                 showToast('Đã cập nhật tóm tắt');
-                // Tự động cuộn đến kết quả tóm tắt (cải tiến giữ lại)
                 setTimeout(() => summaryDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
             });
 
@@ -409,11 +455,20 @@
                 showToast('Đã xóa toàn bộ');
             });
 
+            // Nút ẩn/hiện đơn vị
             unitToggleBtn.addEventListener('click', () => {
                 showUnit = !showUnit;
                 updateUnitButton();
                 summaryDiv.innerText = generateSummary();
                 showToast(showUnit ? 'Đã hiện đơn vị' : 'Đã ẩn đơn vị');
+            });
+
+            // Nút bật/tắt viết tắt (thêm mới)
+            abbrToggleBtn.addEventListener('click', () => {
+                useAbbreviation = !useAbbreviation;
+                updateAbbrButton();
+                summaryDiv.innerText = generateSummary();
+                showToast(useAbbreviation ? 'Đã bật viết tắt' : 'Đã tắt viết tắt');
             });
 
             copyBtn.addEventListener('click', () => {
@@ -465,7 +520,7 @@
 
             selectAllCheckbox.addEventListener('change', handleSelectAllChange);
 
-            // --- Chế độ sáng/tối (giữ lại lưu trạng thái) ---
+            // ----- Chế độ sáng/tối (lưu trạng thái) -----
             const body = document.body;
             const iconTheme = themeToggle.querySelector('i');
             function setTheme(isDark) {
@@ -481,7 +536,7 @@
             setTheme(localStorage.getItem('theme') === 'dark');
             themeToggle.addEventListener('click', () => setTheme(!body.classList.contains('dark-mode')));
 
-            // Khởi tạo
+            // ----- Khởi tạo -----
             currentRows = parseInput();
             if (currentRows.length > 0) {
                 const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
@@ -492,6 +547,7 @@
             renderTable();
             summaryDiv.innerText = generateSummary();
             updateUnitButton();
+            updateAbbrButton();   // cập nhật trạng thái nút viết tắt
         })();
     </script>
 </body>
