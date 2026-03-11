@@ -171,11 +171,9 @@
         <div class="summary-header">
             <h2><i class="fas fa-clipboard-check"></i> Kết quả tóm tắt</h2>
             <div class="summary-actions">
-                <!-- Nút ẩn/hiện đơn vị -->
                 <div class="unit-toggle-btn" id="unitToggleBtn">
                     <i class="fas fa-eye-slash" id="unitIcon"></i> <span id="unitText">Hiện đơn vị</span>
                 </div>
-                <!-- Nút chuyển đổi viết tắt / tên đầy đủ (thêm mới) -->
                 <div class="abbr-toggle-btn" id="abbrToggleBtn">
                     <i class="fas fa-font" id="abbrIcon"></i> <span id="abbrText">Tên đầy đủ</span>
                 </div>
@@ -222,7 +220,6 @@
 
     <script>
         (function() {
-            // Danh sách tên đầy đủ của các chỉ số chính (dùng để tự động chọn)
             const SPECIAL_NAMES = [
                 "Số lượng hồng cầu",
                 "Huyết sắc tố",
@@ -231,8 +228,6 @@
                 "Số lượng bạch cầu",
                 "Tỷ lệ bạch cầu GR"
             ];
-
-            // Mapping tên đầy đủ -> viết tắt theo yêu cầu
             const ABBR_MAP = {
                 "Số lượng hồng cầu": "HC",
                 "Huyết sắc tố": "Hb",
@@ -265,20 +260,17 @@
             const deselectAllBtn = document.getElementById('deselectAllBtn');
             const selectedCountBadge = document.getElementById('selectedCountBadge');
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-            // Nút đơn vị
             const unitToggleBtn = document.getElementById('unitToggleBtn');
             const unitIcon = document.getElementById('unitIcon');
             const unitText = document.getElementById('unitText');
-            // Nút viết tắt
             const abbrToggleBtn = document.getElementById('abbrToggleBtn');
             const abbrIcon = document.getElementById('abbrIcon');
             const abbrText = document.getElementById('abbrText');
 
             let currentRows = [];
-            let showUnit = false;          // ẩn đơn vị mặc định
-            let useAbbreviation = true;    // không viết tắt mặc định
+            let showUnit = false;
+            let useAbbreviation = true;
 
-            // ----- Hàm toast -----
             function showToast(message) {
                 const existing = document.querySelector('.toast-message');
                 if (existing) existing.remove();
@@ -292,7 +284,6 @@
                 }, 2000);
             }
 
-            // Cập nhật giao diện nút đơn vị
             function updateUnitButton() {
                 if (showUnit) {
                     unitIcon.className = 'fas fa-eye';
@@ -303,10 +294,9 @@
                 }
             }
 
-            // Cập nhật giao diện nút viết tắt
             function updateAbbrButton() {
                 if (useAbbreviation) {
-                    abbrIcon.className = 'fas fa-font';  // icon khi bật viết tắt
+                    abbrIcon.className = 'fas fa-font';
                     abbrText.innerText = 'Tên đầy đủ';
                 } else {
                     abbrIcon.className = 'fas fa-i-cursor';
@@ -314,14 +304,11 @@
                 }
             }
 
-            // Parse dữ liệu từ textarea
             function parseInput() {
                 const raw = dataInput.value;
                 if (!raw.trim()) return [];
-
                 const lines = raw.split(/\r?\n/).filter(line => line.trim() !== '');
                 const rows = [];
-
                 for (let line of lines) {
                     const cols = line.split('\t').map(s => s.trim());
                     if (cols.length < 6) continue;
@@ -332,7 +319,6 @@
                     const donvi = cols[3] || '';
                     const giatri = cols[5] || '';
                     if (!ten || !giatri) continue;
-
                     rows.push({
                         stt, ma, ten, 
                         cleanTen: cleanName(ten),
@@ -343,7 +329,6 @@
                 return rows;
             }
 
-            // Cập nhật badge tổng số / đã chọn
             function updateCountBadges() {
                 const total = currentRows.length;
                 const selected = currentRows.filter(r => r.selected).length;
@@ -351,13 +336,10 @@
                 selectedCountBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${selected}/${total}`;
             }
 
-            // Tạo chuỗi tóm tắt dựa trên currentRows, showUnit, useAbbreviation
             function generateSummary() {
                 const selectedRows = currentRows.filter(r => r.selected);
                 if (!selectedRows.length) return 'Chưa chọn chỉ số nào để tóm tắt.';
-                
                 const items = selectedRows.map(r => {
-                    // Xử lý tên (viết tắt hoặc đầy đủ)
                     let nameToShow = r.cleanTen;
                     if (useAbbreviation && ABBR_MAP[nameToShow]) {
                         nameToShow = ABBR_MAP[nameToShow];
@@ -366,14 +348,11 @@
                     if (showUnit && r.donvi && r.donvi !== '-') base += ` ${r.donvi}`;
                     return base;
                 });
-                
                 return items.join(', ');
             }
 
-            // Vẽ lại bảng
             function renderTable() {
                 tableBody.innerHTML = '';
-
                 currentRows.forEach((row, realIdx) => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -386,23 +365,19 @@
                     `;
                     tableBody.appendChild(tr);
                 });
-
                 document.querySelectorAll('.row-checkbox').forEach(cb => {
                     cb.removeEventListener('change', handleRowCheckboxChange);
                     cb.addEventListener('change', handleRowCheckboxChange);
                 });
-
                 const visibleCheckboxes = document.querySelectorAll('.row-checkbox');
                 const allVisibleChecked = visibleCheckboxes.length > 0 && Array.from(visibleCheckboxes).every(cb => cb.checked);
                 if (selectAllCheckbox) {
                     selectAllCheckbox.checked = allVisibleChecked;
                     selectAllCheckbox.indeterminate = !allVisibleChecked && Array.from(visibleCheckboxes).some(cb => cb.checked);
                 }
-
                 updateCountBadges();
             }
 
-            // Xử lý checkbox từng dòng
             function handleRowCheckboxChange(e) {
                 const realIdx = e.target.dataset.realIndex;
                 if (realIdx !== undefined) {
@@ -412,12 +387,10 @@
                 const allChecked = visibleCheckboxes.length > 0 && Array.from(visibleCheckboxes).every(cb => cb.checked);
                 selectAllCheckbox.checked = allChecked;
                 selectAllCheckbox.indeterminate = !allChecked && Array.from(visibleCheckboxes).some(cb => cb.checked);
-                
-                summaryDiv.innerText = generateSummary();   // cập nhật tóm tắt
+                summaryDiv.innerText = generateSummary();
                 updateCountBadges();
             }
 
-            // Xử lý checkbox "chọn tất cả" ở header
             function handleSelectAllChange(e) {
                 const checked = e.target.checked;
                 currentRows.forEach(row => row.selected = checked);
@@ -425,7 +398,6 @@
                 summaryDiv.innerText = generateSummary();
             }
 
-            // Làm mới dữ liệu từ input, tự động chọn (chỉ số chính nếu có, nếu không chọn hết)
             function refreshFromInput() {
                 currentRows = parseInput();
                 const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
@@ -436,7 +408,18 @@
                 summaryDiv.innerText = generateSummary();
             }
 
-            // ----- Sự kiện -----
+            function copySummaryToClipboard() {
+                const content = summaryDiv.innerText;
+                if (!content || content === 'Chưa chọn chỉ số nào để tóm tắt.') {
+                    showToast('Không có nội dung để sao chép');
+                    return false;
+                }
+                navigator.clipboard.writeText(content)
+                    .then(() => showToast('Đã sao chép tóm tắt!'))
+                    .catch(() => showToast('Sao chép thất bại'));
+                return true;
+            }
+
             summarizeBtn.addEventListener('click', () => {
                 const parsed = parseInput();
                 if (parsed.length === 0) {
@@ -444,8 +427,10 @@
                     return;
                 }
                 refreshFromInput();
-                showToast('Đã cập nhật tóm tắt');
-                setTimeout(() => summaryDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+                const content = summaryDiv.innerText;
+                navigator.clipboard.writeText(content)
+                    .then(() => showToast('Đã tóm tắt và sao chép vào clipboard!'))
+                    .catch(() => showToast('Tóm tắt thành công nhưng sao chép thất bại'));
             });
 
             clearBtn.addEventListener('click', () => {
@@ -456,7 +441,6 @@
                 showToast('Đã xóa toàn bộ');
             });
 
-            // Nút ẩn/hiện đơn vị
             unitToggleBtn.addEventListener('click', () => {
                 showUnit = !showUnit;
                 updateUnitButton();
@@ -464,7 +448,6 @@
                 showToast(showUnit ? 'Đã hiện đơn vị' : 'Đã ẩn đơn vị');
             });
 
-            // Nút bật/tắt viết tắt (thêm mới)
             abbrToggleBtn.addEventListener('click', () => {
                 useAbbreviation = !useAbbreviation;
                 updateAbbrButton();
@@ -472,16 +455,7 @@
                 showToast(useAbbreviation ? 'Đã bật viết tắt' : 'Đã tắt viết tắt');
             });
 
-            copyBtn.addEventListener('click', () => {
-                const content = summaryDiv.innerText;
-                if (!content || content === 'Chưa chọn chỉ số nào để tóm tắt.') {
-                    showToast('Không có nội dung để sao chép');
-                    return;
-                }
-                navigator.clipboard.writeText(content)
-                    .then(() => showToast('Đã sao chép tóm tắt!'))
-                    .catch(() => showToast('Sao chép thất bại'));
-            });
+            copyBtn.addEventListener('click', copySummaryToClipboard);
 
             selectMainBtn.addEventListener('click', () => {
                 currentRows.forEach(row => {
@@ -521,7 +495,6 @@
 
             selectAllCheckbox.addEventListener('change', handleSelectAllChange);
 
-            // ----- Chế độ sáng/tối (lưu trạng thái) -----
             const body = document.body;
             const iconTheme = themeToggle.querySelector('i');
             function setTheme(isDark) {
@@ -537,7 +510,6 @@
             setTheme(localStorage.getItem('theme') === 'dark');
             themeToggle.addEventListener('click', () => setTheme(!body.classList.contains('dark-mode')));
 
-            // ----- Khởi tạo -----
             currentRows = parseInput();
             if (currentRows.length > 0) {
                 const hasSpecial = currentRows.some(r => SPECIAL_NAMES.includes(r.cleanTen));
@@ -548,7 +520,7 @@
             renderTable();
             summaryDiv.innerText = generateSummary();
             updateUnitButton();
-            updateAbbrButton();   // cập nhật trạng thái nút viết tắt
+            updateAbbrButton();
         })();
     </script>
 </body>
