@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Công cụ tóm tắt chỉ số cận lâm sàng - Hỗ trợ chọn lọc, viết tắt, đơn vị, tự động sao chép">
+    <title>Tóm tắt CLS y lệnh nội trú</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512' fill='%232563eb'%3E%3Cpath d='M288 64c0-17.7-14.3-32-32-32s-32 14.3-32 32c0 0 0 0 0 0v32H192V64c0-17.7-14.3-32-32-32s-32 14.3-32 32v64c0 17.7 14.3 32 32 32h32c17.7 0 32-14.3 32-32v-3.9c23.1 6.9 40 28.3 40 53.9v88c0 30.9-25.1 56-56 56s-56-25.1-56-56v-72c0-17.7-14.3-32-32-32s-32 14.3-32 32v72c0 66.3 53.7 120 120 120s120-53.7 120-120v-88c0-25.6-16.9-47-40-53.9V96h32c17.7 0 32-14.3 32-32V64z'/%3E%3C/svg%3E">
+    <style>
+        /* ---------- RESET & VARIABLES ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-body: #f4f7fb;
+            --container-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-default: #e2e8f0;
+            --border-focus: #3b82f6;
+            --card-bg: #ffffff;
+            --badge-bg: #f1f5f9;
+            --btn-bg: #ffffff;
+            --btn-primary-bg: linear-gradient(145deg, #2563eb, #3b82f6);
+            --btn-primary-hover: #1d4ed8;
+            --table-header-bg: #f8fafc;
+            --table-row-even: #ffffff;
+            --table-row-hover: #f1f5f9;
+            --table-row-selected: #eff6ff; 
+            --table-row-selected-border: #bfdbfe;
+            --toast-bg: #1e293b;
+            --toast-text: #ffffff;
+            --star-color: #f59e0b;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --container-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-default: #334155;
+            --border-focus: #60a5fa;
+            --card-bg: #1e293b;
+            --badge-bg: #334155;
+            --btn-bg: #1e293b;
+            --btn-primary-bg: linear-gradient(145deg, #3b82f6, #60a5fa);
+            --btn-primary-hover: #2563eb;
+            --table-header-bg: #0f172a;
+            --table-row-even: #1e293b;
+            --table-row-hover: #334155;
+            --table-row-selected: #1e3a8a; 
+            --table-row-selected-border: #1e40af;
+            --toast-bg: #e2e8f0;
+            --toast-text: #0f172a;
+            --star-color: #fbbf24;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ---------- BASE ---------- */
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-body); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 32px 20px; color: var(--text-primary); transition: background 0.3s, color 0.3s; line-height: 1.5; }
+        .container { width: 100%; max-width: 1300px; background: var(--container-bg); border-radius: 32px; padding: 36px; border: 1px solid var(--border-default); box-shadow: var(--shadow-md); transition: var(--transition); }
+        
+        /* ---------- ANIMATIONS ---------- */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeInUp 0.4s ease forwards; }
+
+        /* ---------- HEADER ---------- */
+        .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .app-header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 12px; color: var(--text-primary); }
+        .app-header h1 i { background: var(--btn-primary-bg); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-default); border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); font-size: 20px; transition: var(--transition); box-shadow: var(--shadow-sm); }
+        .icon-btn:hover { background: var(--badge-bg); color: var(--focus-border); transform: translateY(-2px); }
+        .icon-btn.active { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        body.dark-mode .icon-btn.active { color: #60a5fa; border-color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
+
+        /* ---------- INPUT AREA ---------- */
+        .input-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-weight: 600; color: var(--text-primary); font-size: 17px; flex-wrap: wrap; gap: 12px; }
+        .textarea-wrapper { position: relative; }
+        
+        /* Quick Paste Button */
+        .quick-paste-btn { position: absolute; right: 16px; top: 16px; background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; z-index: 5; }
+        .quick-paste-btn:hover { background: #2563eb; color: white; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        body.dark-mode .quick-paste-btn { background: rgba(96, 165, 250, 0.1); color: #60a5fa; border-color: rgba(96, 165, 250, 0.2); }
+        body.dark-mode .quick-paste-btn:hover { background: #3b82f6; color: #0f172a; }
+
+        textarea { width: 100%; height: 160px; padding: 20px 20px 20px 20px; border: 2px solid var(--border-default); border-radius: 24px; font-family: 'Inter', monospace; font-size: 14.5px; line-height: 1.6; background: var(--card-bg); resize: vertical; outline: none; transition: 0.2s; color: var(--text-primary); scrollbar-width: thin; scrollbar-color: var(--border-default) transparent; }
+        textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+        textarea::placeholder { color: #94a3b8; }
+
+        /* ---------- BUTTONS ---------- */
+        .button-strip { display: flex; gap: 16px; margin: 24px 0 24px; justify-content: center; flex-wrap: wrap; }
+        .btn { border: none; padding: 12px 32px; border-radius: 60px; font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: var(--transition); background: var(--btn-bg); border: 1px solid var(--border-default); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        .btn-primary { background: var(--btn-primary-bg); border: none; color: #ffffff; box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.5); }
+        body.dark-mode .btn-primary { color: #0f172a; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgba(37, 99, 235, 0.6); opacity: 0.95; }
+        .btn-outline:hover { background: var(--table-row-hover); transform: translateY(-2px); color: var(--border-focus); border-color: var(--border-focus); }
+        .btn-sm { padding: 8px 20px; font-size: 14px; border-radius: 40px; }
+
+        /* ---------- SUMMARY SECTION ---------- */
+        .summary-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 32px 0 20px; gap: 16px; }
+        .summary-header h2 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--text-primary); }
+        .summary-header h2 i { color: var(--border-focus); }
+        .summary-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .toggle-action-btn, .copy-btn { background: var(--btn-bg); border: 1px solid var(--border-default); border-radius: 40px; padding: 10px 20px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: var(--transition); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        .toggle-action-btn:hover, .copy-btn:hover { background: var(--badge-bg); transform: translateY(-1px); border-color: var(--border-focus); color: var(--border-focus); }
+        .copy-btn { background: rgba(59, 130, 246, 0.1); color: #2563eb; border-color: transparent; }
+        body.dark-mode .copy-btn { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+        .copy-btn:hover { background: #2563eb; color: white; }
+        body.dark-mode .copy-btn:hover { background: #3b82f6; color: #0f172a; }
+
+        .summary-card { background: var(--card-bg); border-radius: 24px; padding: 24px 28px; border: 1px solid var(--border-default); border-left: 6px solid var(--border-focus); font-size: 16.5px; line-height: 1.7; color: var(--text-primary); min-height: 100px; white-space: pre-wrap; word-break: break-word; box-shadow: var(--shadow-sm); transition: background-color 0.4s ease; }
+        .summary-card:empty::before { content: "Dán kết quả xét nghiệm để tự động tóm tắt..."; color: var(--text-secondary); font-style: italic; }
+        
+        /* Hiệu ứng nhấp nháy êm ái hơn */
+        .summary-card.updated { animation: highlightUpdate 0.6s ease-out; }
+        @keyframes highlightUpdate {
+            0% { background-color: rgba(59, 130, 246, 0.15); }
+            100% { background-color: var(--card-bg); }
+        }
+        body.dark-mode @keyframes highlightUpdate {
+            0% { background-color: rgba(96, 165, 250, 0.2); }
+            100% { background-color: var(--card-bg); }
+        }
+
+        .stats-badge { background: var(--badge-bg); border-radius: 40px; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-default); color: var(--text-primary); }
+
+        /* ---------- TABLE ---------- */
+        .table-container { border-radius: 24px; background: var(--card-bg); border: 1px solid var(--border-default); overflow: hidden; margin-top: 16px; box-shadow: var(--shadow-md); transition: var(--transition); }
+        .table-container.hidden { display: none; }
+        .table-controls { display: flex; gap: 12px; padding: 16px 24px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-default); background: var(--table-header-bg); }
+        .table-scroll { overflow-x: auto; max-height: 450px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-default) transparent; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 700px; text-align: left; }
+        th { background: var(--table-header-bg); color: var(--text-secondary); font-weight: 700; padding: 16px 14px; border-bottom: 2px solid var(--border-default); position: sticky; top: 0; z-index: 10; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 14px; border-bottom: 1px solid var(--border-default); color: var(--text-primary); transition: background 0.15s; }
+        td:first-child, th:first-child { text-align: center; width: 60px; }
+        
+        input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--border-focus); border-radius: 4px; }
+        
+        tbody tr:nth-child(even) { background-color: var(--table-row-even); }
+        tbody tr:hover td { background-color: var(--table-row-hover); cursor: pointer; }
+        
+        /* Highlight dòng được chọn */
+        tbody tr.selected-row td { background-color: var(--table-row-selected); border-bottom-color: var(--table-row-selected-border); }
+        tbody tr.selected-row:hover td { background-color: var(--table-row-selected); filter: brightness(0.95); }
+
+        .star-icon { color: var(--star-color); margin-right: 8px; font-size: 12px; }
+
+        .toggle-table-btn { background: var(--btn-bg); border: 1px solid var(--border-default); border-radius: 60px; padding: 12px 24px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; margin: 16px 0 8px; transition: var(--transition); font-size: 15px; box-shadow: var(--shadow-sm); color: var(--text-primary); }
+        .toggle-table-btn:hover { background: var(--badge-bg); color: var(--border-focus); border-color: var(--border-focus); transform: translateY(-2px); }
+
+        /* ---------- FLOATING FOOTER LINK ---------- */
+        .fixed-footer-link { position: fixed; bottom: 24px; right: 24px; background: var(--container-bg); border-radius: 60px; padding: 12px 24px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-md); z-index: 1000; transition: var(--transition); border: 1px solid var(--border-default); color: var(--text-primary); }
+        .fixed-footer-link a { color: var(--border-focus); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(59, 130, 246, 0.1); border-radius: 40px; transition: 0.2s; }
+        body.dark-mode .fixed-footer-link a { background: rgba(96, 165, 250, 0.15); }
+        .fixed-footer-link a:hover { background: var(--border-focus); color: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        body.dark-mode .fixed-footer-link a:hover { background: var(--border-focus); color: #0f172a; }
+
+        /* ---------- TOAST ---------- */
+        .toast-message { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--toast-bg); color: var(--toast-text); padding: 16px 32px; border-radius: 60px; font-weight: 600; display: flex; align-items: center; gap: 12px; z-index: 1100; animation: toastSlide 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1); font-size: 15px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); }
+        .toast-message.fade-out { opacity: 0; transform: translateX(-50%) translateY(20px); transition: all 0.3s ease; }
+        @keyframes toastSlide { from { opacity: 0; transform: translateX(-50%) translateY(40px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .container { padding: 24px; border-radius: 24px; }
+            .app-header { flex-direction: column; text-align: center; }
+            .header-actions { margin-top: 8px; }
+            .summary-actions { width: 100%; justify-content: space-between; }
+            .toggle-action-btn, .copy-btn { flex: 1; justify-content: center; padding: 10px 12px; font-size: 13px; }
+            .button-strip { flex-direction: column; }
+            .btn { width: 100%; }
+            .fixed-footer-link { bottom: 16px; right: 50%; transform: translateX(50%); width: max-content; padding: 10px 20px; font-size: 12px; }
+            .table-controls { justify-content: space-between; }
+            .btn-sm { flex: 1; justify-content: center; padding: 8px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="app-header">
+        <h1><i class="fas fa-microscope"></i> TÓM TẮT CẬN LÂM SÀNG</h1>
+        <div class="header-actions">
+            <div class="icon-btn" id="autoSummarizeToggle" title="Tự động tóm tắt & sao chép (bật/tắt)">
+                <i id="autoToggleIcon" class="fas fa-toggle-on"></i>
+            </div>
+            <div class="icon-btn" id="themeToggle" title="Chế độ tối/sáng">
+                <i class="fas fa-sun"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <div class="input-label">
+            <span><i class="fas fa-table" style="color: var(--text-secondary); margin-right: 6px;"></i> Dữ liệu chỉ số</span>
+            <span class="stats-badge" id="rowCountBadge"><i class="fas fa-database"></i> 0 dòng</span>
+        </div>
+        <div class="textarea-wrapper">
+            <button id="quickPasteBtn" class="quick-paste-btn" title="Dán dữ liệu từ Clipboard"><i class="fas fa-paste"></i> Dán nhanh</button>
+            <textarea id="dataInput" placeholder="STT	Mã	Chỉ số	Đơn vị	(trống)	Giá trị&#10;1	H01	Số lượng hồng cầu	x10^12/l	-	4.31&#10;2	H02	Huyết sắc tố	g/l	-	138&#10;3	H03	Hematocrit	%	-	0.42"></textarea>
+        </div>
+        <div class="button-strip">
+            <button class="btn btn-primary" id="summarizeBtn"><i class="fas fa-flask"></i> Tóm tắt & Sao chép</button>
+            <button class="btn btn-outline" id="clearBtn"><i class="fas fa-eraser"></i> Làm mới</button>
+        </div>
+    </div>
+
+    <div class="summary-header">
+        <h2><i class="fas fa-clipboard-list"></i> Kết quả</h2>
+        <div class="summary-actions">
+            <div class="toggle-action-btn" id="unitToggleBtn">
+                <i class="fas fa-eye-slash" id="unitIcon"></i> <span id="unitText">Hiện đơn vị</span>
+            </div>
+            <div class="toggle-action-btn" id="abbrToggleBtn">
+                <i class="fas fa-font" id="abbrIcon"></i> <span id="abbrText">Tên đầy đủ</span>
+            </div>
+            <div class="copy-btn" id="copySummaryBtn"><i class="far fa-copy"></i> Copy KQ</div>
+        </div>
+    </div>
+    
+    <div class="summary-card" id="summaryText"></div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 12px;">
+        <div class="toggle-table-btn" id="toggleTableBtn" role="button" tabindex="0">
+            <i class="fas fa-chevron-right" id="toggleIcon"></i> Hiển thị bảng chi tiết
+        </div>
+        <span class="stats-badge" id="selectedCountBadge"><i class="fas fa-check-circle" style="color: var(--border-focus);"></i> 0/0</span>
+    </div>
+
+    <div id="tableContainer" class="table-container hidden animate-fade-in">
+        <div class="table-controls">
+            <button class="btn btn-sm btn-outline" id="selectMainBtn"><i class="fas fa-star" style="color: var(--star-color);"></i> Chỉ số chính</button>
+            <button class="btn btn-sm btn-outline" id="selectAllBtn"><i class="fas fa-check-double"></i> Chọn hết</button>
+            <button class="btn btn-sm btn-outline" id="deselectAllBtn"><i class="fas fa-times"></i> Bỏ chọn</button>
+        </div>
+        <div class="table-scroll">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllCheckbox"></th>
+                        <th>STT</th>
+                        <th>Mã</th>
+                        <th>Tên chỉ số</th>
+                        <th>Đơn vị</th>
+                        <th>Giá trị</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="fixed-footer-link">
+    <i class="fas fa-location-arrow"></i> Y lệnh ngoại trú
+    <a href="https://qtrungyb.github.io/ttcls/" target="_blank" rel="noopener noreferrer">
+        MỞ <i class="fas fa-external-link-alt"></i>
+    </a>
+</div>
+
+<script>
+    (function() {
+        // ---------- CẤU HÌNH LOGIC ----------
+        const MAIN_INDICATORS = [
+            "Số lượng hồng cầu", "Huyết sắc tố", "Hematocrit",
+            "Số lượng tiểu cầu", "Số lượng bạch cầu", "Tỷ lệ bạch cầu GR"
+        ];
+        const ABBR_MAP = {
+            "Số lượng hồng cầu": "HC", "Huyết sắc tố": "Hb", "Hematocrit": "HTC",
+            "Số lượng tiểu cầu": "TC", "Số lượng bạch cầu": "BC", "Tỷ lệ bạch cầu GR": "N%"
+        };
+
+        function cleanName(rawName) {
+            if (!rawName) return '';
+            let trimmed = rawName.trim().replace(/^["']|["']$/g, '');
+            const match = trimmed.match(/^\([^)]+\)\s*(.*)/);
+            return match ? match[1].trim() : trimmed;
+        }
+
+        // ---------- DOM ELEMENTS ----------
+        const dataInput = document.getElementById('dataInput');
+        const quickPasteBtn = document.getElementById('quickPasteBtn');
+        const summaryDiv = document.getElementById('summaryText');
+        const rowCountBadge = document.getElementById('rowCountBadge');
+        const tableBody = document.getElementById('tableBody');
+        const copySummaryBtn = document.getElementById('copySummaryBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const toggleTableBtn = document.getElementById('toggleTableBtn');
+        const tableContainer = document.getElementById('tableContainer');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const selectMainBtn = document.getElementById('selectMainBtn');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const deselectAllBtn = document.getElementById('deselectAllBtn');
+        const selectedCountBadge = document.getElementById('selectedCountBadge');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const unitToggleBtn = document.getElementById('unitToggleBtn');
+        const unitIcon = document.getElementById('unitIcon');
+        const unitText = document.getElementById('unitText');
+        const abbrToggleBtn = document.getElementById('abbrToggleBtn');
+        const abbrIcon = document.getElementById('abbrIcon');
+        const abbrText = document.getElementById('abbrText');
+        const autoSummarizeToggle = document.getElementById('autoSummarizeToggle');
+        const autoToggleIcon = document.getElementById('autoToggleIcon');
+
+        let currentRows = []; 
+        let showUnit = false;
+        let useAbbreviation = true; 
+        let autoSummarizeEnabled = true;
+        let autoDebounceTimer = null;
+
+        // ---------- UI HELPERS ----------
+        function showToast(message, isError = false) {
+            document.querySelector('.toast-message')?.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}" style="color: ${isError ? '#ef4444' : '#22c55e'};"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        function updateAutoToggleUI() {
+            if (autoSummarizeEnabled) {
+                autoToggleIcon.className = 'fas fa-toggle-on';
+                autoSummarizeToggle.classList.add('active');
+                autoSummarizeToggle.setAttribute('title', 'Tự động tóm tắt & sao chép: Đang bật');
+            } else {
+                autoToggleIcon.className = 'fas fa-toggle-off';
+                autoSummarizeToggle.classList.remove('active');
+                autoSummarizeToggle.setAttribute('title', 'Tự động tóm tắt: Đang tắt');
+            }
+        }
+
+        // ---------- CORE LOGIC ----------
+        function parseInputPreserveSelection() {
+            const raw = dataInput.value;
+            if (!raw.trim()) return [];
+            const lines = raw.split(/\r?\n/).filter(line => line.trim() !== '');
+            const newRows = [];
+            for (let line of lines) {
+                const cols = line.split('\t').map(s => s.trim());
+                if (cols.length < 6) continue;
+                const stt = cols[0];
+                if (!/^\d+$/.test(stt)) continue;
+                const ma = cols[1] || '';
+                const ten = cols[2] || '';
+                const donvi = cols[3] || '';
+                const giatri = cols[5] || '';
+                if (!ten || !giatri) continue;
+                const clean = cleanName(ten);
+                newRows.push({
+                    stt, ma, ten, cleanTen: clean, donvi, giatri,
+                    selected: false,
+                    key: `${stt}|${ma}|${clean}`
+                });
+            }
+            
+            const oldSelectionMap = new Map();
+            currentRows.forEach(row => { if (row.selected) oldSelectionMap.set(row.key, true); });
+            newRows.forEach(row => {
+                if (oldSelectionMap.has(row.key)) row.selected = true;
+            });
+            
+            const hasAnySelected = newRows.some(r => r.selected);
+            if (!hasAnySelected && newRows.length > 0) {
+                const hasSpecial = newRows.some(r => MAIN_INDICATORS.includes(r.cleanTen));
+                newRows.forEach(row => {
+                    row.selected = hasSpecial ? MAIN_INDICATORS.includes(row.cleanTen) : true;
+                });
+            }
+            return newRows;
+        }
+
+        function refreshData() {
+            currentRows = parseInputPreserveSelection();
+            renderTable();
+            updateSummaryAndBadges();
+        }
+
+        function updateSummaryAndBadges() {
+            summaryDiv.innerText = generateSummaryText();
+            
+            const total = currentRows.length;
+            const selectedCount = currentRows.filter(r => r.selected).length;
+            rowCountBadge.innerHTML = `<i class="fas fa-list-ol"></i> ${total} dòng`;
+            selectedCountBadge.innerHTML = `<i class="fas fa-check-circle" style="color: var(--border-focus);"></i> ${selectedCount}/${total}`;
+
+            // Kích hoạt hiệu ứng nhấp nháy êm ái
+            summaryDiv.classList.remove('updated');
+            void summaryDiv.offsetWidth; 
+            summaryDiv.classList.add('updated');
+        }
+
+        function generateSummaryText() {
+            const selected = currentRows.filter(r => r.selected);
+            if (!selected.length) return '';
+            return selected.map(r => {
+                let displayName = r.cleanTen;
+                if (useAbbreviation && ABBR_MAP[displayName]) displayName = ABBR_MAP[displayName];
+                let text = `${displayName} ${r.giatri}`;
+                if (showUnit && r.donvi && r.donvi !== '-') text += ` ${r.donvi}`;
+                return text;
+            }).join(', ');
+        }
+
+        function renderTable() {
+            tableBody.innerHTML = '';
+            currentRows.forEach((row, idx) => {
+                const isMain = MAIN_INDICATORS.includes(row.cleanTen);
+                const starHtml = isMain ? `<i class="fas fa-star star-icon"></i>` : '';
+                const tr = document.createElement('tr');
+                if (row.selected) tr.classList.add('selected-row');
+
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="row-checkbox" data-index="${idx}" ${row.selected ? 'checked' : ''}></td>
+                    <td>${row.stt}</td>
+                    <td>${row.ma}</td>
+                    <td>${starHtml}${escapeHtml(row.ten)}</td>
+                    <td>${row.donvi}</td>
+                    <td><strong>${row.giatri}</strong></td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.removeEventListener('change', handleRowCheck);
+                cb.addEventListener('change', handleRowCheck);
+            });
+            
+            // Cho phép click vào dòng để chọn
+            document.querySelectorAll('#tableBody tr').forEach((tr, i) => {
+                tr.addEventListener('click', function(e) {
+                    if(e.target.type !== 'checkbox') {
+                        const cb = this.querySelector('.row-checkbox');
+                        cb.checked = !cb.checked;
+                        handleRowCheck({ target: cb, dataset: { index: i } });
+                    }
+                });
+            });
+
+            updateHeaderCheckbox();
+        }
+
+        function escapeHtml(str) {
+            return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : '';
+        }
+
+        function handleRowCheck(e) {
+            const idx = e.target.dataset ? e.target.dataset.index : e.target.getAttribute('data-index');
+            if (idx !== undefined) {
+                currentRows[idx].selected = e.target.checked;
+                renderTable();
+                updateSummaryAndBadges();
+            }
+        }
+
+        function updateHeaderCheckbox() {
+            const visibleChecks = document.querySelectorAll('.row-checkbox');
+            const allChecked = visibleChecks.length > 0 && Array.from(visibleChecks).every(c => c.checked);
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = !allChecked && Array.from(visibleChecks).some(c => c.checked);
+            }
+        }
+
+        function handleSelectAllChange(e) {
+            currentRows.forEach(row => row.selected = e.target.checked);
+            renderTable();
+            updateSummaryAndBadges();
+        }
+
+        function copySummaryToClipboard(customMsg = null) {
+            const content = summaryDiv.innerText;
+            if (!content) {
+                showToast('Không có nội dung để copy', true);
+                return false;
+            }
+            navigator.clipboard.writeText(content).then(() => {
+                showToast(customMsg || 'Đã copy thành công');
+            }).catch(() => showToast('Copy thất bại, vui lòng copy thủ công', true));
+            return true;
+        }
+
+        function performAutoSummarize() {
+            if (!autoSummarizeEnabled) return;
+            refreshData(); 
+            if (currentRows.some(r => r.selected) && currentRows.length) {
+                const content = summaryDiv.innerText;
+                if (content) {
+                    navigator.clipboard.writeText(content).catch(() => {});
+                    showToast('Đã tóm tắt & tự động Copy');
+                }
+            }
+        }
+
+        function debouncedAuto() {
+            if (!autoSummarizeEnabled) return;
+            if (autoDebounceTimer) clearTimeout(autoDebounceTimer);
+            autoDebounceTimer = setTimeout(() => {
+                performAutoSummarize();
+                autoDebounceTimer = null;
+            }, 300);
+        }
+
+        // ---------- EVENT LISTENERS ----------
+        
+        // Quick Paste Button
+        quickPasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                dataInput.value = text;
+                debouncedAuto();
+                if(!autoSummarizeEnabled) showToast('Đã dán dữ liệu');
+            } catch (err) {
+                showToast('Trình duyệt không cho phép dán tự động. Vui lòng bấm Ctrl+V', true);
+            }
+        });
+
+        dataInput.addEventListener('input', debouncedAuto);
+        
+        summarizeBtn.addEventListener('click', () => {
+            refreshData();
+            if (currentRows.some(r => r.selected)) {
+                copySummaryToClipboard('Đã tóm tắt & Copy thành công');
+            } else {
+                showToast('Chưa chọn chỉ số nào', true);
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            dataInput.value = '';
+            refreshData();
+            showToast('Đã xóa dữ liệu');
+        });
+        
+        unitToggleBtn.addEventListener('click', () => {
+            showUnit = !showUnit;
+            unitIcon.className = showUnit ? 'fas fa-eye' : 'fas fa-eye-slash';
+            unitText.innerText = showUnit ? 'Ẩn đơn vị' : 'Hiện đơn vị';
+            updateSummaryAndBadges();
+        });
+        
+        abbrToggleBtn.addEventListener('click', () => {
+            useAbbreviation = !useAbbreviation;
+            abbrIcon.className = useAbbreviation ? 'fas fa-font' : 'fas fa-i-cursor';
+            abbrText.innerText = useAbbreviation ? 'Tên đầy đủ' : 'Viết tắt';
+            updateSummaryAndBadges();
+        });
+        
+        copySummaryBtn.addEventListener('click', () => copySummaryToClipboard('Đã Copy kết quả'));
+        
+        selectMainBtn.addEventListener('click', () => {
+            currentRows.forEach(row => row.selected = MAIN_INDICATORS.includes(row.cleanTen));
+            renderTable(); updateSummaryAndBadges();
+        });
+        
+        selectAllBtn.addEventListener('click', () => {
+            currentRows.forEach(row => row.selected = true);
+            renderTable(); updateSummaryAndBadges();
+        });
+        
+        deselectAllBtn.addEventListener('click', () => {
+            currentRows.forEach(row => row.selected = false);
+            renderTable(); updateSummaryAndBadges();
+        });
+        
+        toggleTableBtn.addEventListener('click', () => {
+            const hidden = tableContainer.classList.contains('hidden');
+            tableContainer.classList.toggle('hidden', !hidden);
+            toggleIcon.className = hidden ? 'fas fa-chevron-down' : 'fas fa-chevron-right';
+            toggleTableBtn.innerHTML = `<i class="fas fa-chevron-${hidden ? 'down' : 'right'}"></i> ${hidden ? 'Ẩn bảng chi tiết' : 'Hiển thị bảng chi tiết'}`;
+        });
+        
+        selectAllCheckbox.addEventListener('change', handleSelectAllChange);
+
+        // Dark mode
+        function setTheme(isDark) {
+            document.body.classList.toggle('dark-mode', isDark);
+            themeToggle.querySelector('i').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        setTheme(localStorage.getItem('theme') === 'dark');
+        themeToggle.addEventListener('click', () => setTheme(!document.body.classList.contains('dark-mode')));
+
+        // Auto summarize toggle
+        autoSummarizeToggle.addEventListener('click', () => {
+            autoSummarizeEnabled = !autoSummarizeEnabled;
+            updateAutoToggleUI();
+            localStorage.setItem('autoSummarize', autoSummarizeEnabled);
+            showToast(autoSummarizeEnabled ? 'Đã bật tự động xử lý' : 'Đã tắt tự động');
+        });
+        
+        const savedAuto = localStorage.getItem('autoSummarize');
+        autoSummarizeEnabled = savedAuto !== null ? savedAuto === 'true' : true;
+        updateAutoToggleUI();
+
+        // INIT
+        refreshData();
+        if (autoSummarizeEnabled && dataInput.value.trim() !== "") {
+            setTimeout(() => performAutoSummarize(), 150);
+        }
+    })();
+</script>
+</body>
+</html>
