@@ -270,7 +270,7 @@
 
 <script>
     (function() {
-        // ---------- CẤU HÌNH LOGIC ----------
+        // ---------- LOGIC ----------
         const MAIN_INDICATORS = [
             "Số lượng hồng cầu", "Huyết sắc tố", "Hematocrit",
             "Số lượng tiểu cầu", "Số lượng bạch cầu", "Tỷ lệ bạch cầu GR"
@@ -283,8 +283,21 @@
         function cleanName(rawName) {
             if (!rawName) return '';
             let trimmed = rawName.trim().replace(/^["']|["']$/g, '');
-            const match = trimmed.match(/^\([^)]+\)\s*(.*)/);
-            return match ? match[1].trim() : trimmed;
+            let lowerTrimmed = trimmed.toLowerCase();            
+            if (lowerTrimmed.includes("pt (inr)") || lowerTrimmed.includes("pt(inr)")) {
+                return "PT (INR)";
+            }            
+            if (lowerTrimmed.includes("aptt") && (lowerTrimmed.includes("chứng r") || lowerTrimmed.includes("chung r"))) {
+                return "APTT (Bệnh/ Chứng R)";
+            }
+            if ((lowerTrimmed.includes("sgpt") || lowerTrimmed.includes("gpt")) && lowerTrimmed.includes("alt")) {
+                return "SGPT (ALT)";
+            }           
+            if ((lowerTrimmed.includes("sgot") || lowerTrimmed.includes("got")) && lowerTrimmed.includes("ast")) {
+                return "SGOT (AST)";
+            }
+            let clean = trimmed.replace(/\s*\([^)]*\)/g, '').trim();
+            return clean.replace(/\s+/g, ' ');
         }
 
         // ---------- DOM ELEMENTS ----------
@@ -380,6 +393,10 @@
                 const hasSpecial = newRows.some(r => MAIN_INDICATORS.includes(r.cleanTen));
                 newRows.forEach(row => {
                     row.selected = hasSpecial ? MAIN_INDICATORS.includes(row.cleanTen) : true;
+                    // Bỏ chọn tự động nếu giá trị là '- neg'
+                    if (row.giatri.trim().toLowerCase() === '- neg') {
+                        row.selected = false;
+                    }
                 });
             }
             return newRows;
@@ -399,14 +416,13 @@
             rowCountBadge.innerHTML = `<i class="fas fa-list-ol"></i> ${total} dòng`;
             selectedCountBadge.innerHTML = `<i class="fas fa-check-circle" style="color: var(--border-focus);"></i> ${selectedCount}/${total}`;
 
-            // Kích hoạt hiệu ứng nhấp nháy êm ái
             summaryDiv.classList.remove('updated');
             void summaryDiv.offsetWidth; 
             summaryDiv.classList.add('updated');
         }
 
         function generateSummaryText() {
-            const selected = currentRows.filter(r => r.selected);
+            const selected = currentRows.filter(r => r.selected && r.giatri.trim().toLowerCase() !== '- neg');
             if (!selected.length) return '';
             return selected.map(r => {
                 let displayName = r.cleanTen;
@@ -414,7 +430,7 @@
                 let text = `${displayName} ${r.giatri}`;
                 if (showUnit && r.donvi && r.donvi !== '-') text += ` ${r.donvi}`;
                 return text;
-            }).join(', ');
+            }).join('; ');
         }
 
         function renderTable() {
@@ -441,7 +457,6 @@
                 cb.addEventListener('change', handleRowCheck);
             });
             
-            // Cho phép click vào dòng để chọn
             document.querySelectorAll('#tableBody tr').forEach((tr, i) => {
                 tr.addEventListener('click', function(e) {
                     if(e.target.type !== 'checkbox') {
@@ -478,7 +493,13 @@
         }
 
         function handleSelectAllChange(e) {
-            currentRows.forEach(row => row.selected = e.target.checked);
+            currentRows.forEach(row => {
+                if (e.target.checked) {
+                    row.selected = row.giatri.trim().toLowerCase() !== '- neg';
+                } else {
+                    row.selected = false;
+                }
+            });
             renderTable();
             updateSummaryAndBadges();
         }
@@ -564,12 +585,16 @@
         copySummaryBtn.addEventListener('click', () => copySummaryToClipboard('Đã Copy kết quả'));
         
         selectMainBtn.addEventListener('click', () => {
-            currentRows.forEach(row => row.selected = MAIN_INDICATORS.includes(row.cleanTen));
+            currentRows.forEach(row => {
+                row.selected = MAIN_INDICATORS.includes(row.cleanTen) && row.giatri.trim().toLowerCase() !== '- neg';
+            });
             renderTable(); updateSummaryAndBadges();
         });
         
         selectAllBtn.addEventListener('click', () => {
-            currentRows.forEach(row => row.selected = true);
+            currentRows.forEach(row => {
+                row.selected = row.giatri.trim().toLowerCase() !== '- neg';
+            });
             renderTable(); updateSummaryAndBadges();
         });
         
@@ -587,7 +612,6 @@
         
         selectAllCheckbox.addEventListener('change', handleSelectAllChange);
 
-        // Dark mode
         function setTheme(isDark) {
             document.body.classList.toggle('dark-mode', isDark);
             themeToggle.querySelector('i').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
@@ -596,7 +620,6 @@
         setTheme(localStorage.getItem('theme') === 'dark');
         themeToggle.addEventListener('click', () => setTheme(!document.body.classList.contains('dark-mode')));
 
-        // Auto summarize toggle
         autoSummarizeToggle.addEventListener('click', () => {
             autoSummarizeEnabled = !autoSummarizeEnabled;
             updateAutoToggleUI();
@@ -608,7 +631,6 @@
         autoSummarizeEnabled = savedAuto !== null ? savedAuto === 'true' : true;
         updateAutoToggleUI();
 
-        // INIT
         refreshData();
         if (autoSummarizeEnabled && dataInput.value.trim() !== "") {
             setTimeout(() => performAutoSummarize(), 150);
